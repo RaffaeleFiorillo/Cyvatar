@@ -6,25 +6,25 @@
 
 This project builds upon another repository where a demo was developed in pygame.
 
-## Current implementation includes:
+## This implementation includes:
 ### HP Barr
-  - Has the same size regardless of the MAX amount of HP the player has. But the actual HP is proportionally made to fit in inside of the barr.
+  - Has the same size regardless of the MAX amount of HP the player has. But the actual HP is proportionally made to fit in inside the barr.
   - Changes color in a discrete manner according to the HP level;
 ### Energy Barr
-  - The color lerps according to the energy level. It goes from a light blue (max energy) and dark blue (low energy);
+  - The color ""lerps""" according to the energy level. It goes from a light blue (max energy) and dark blue (low energy);
   - A certain amount of time after the last energy usage, the barr automatically starts to fill up again at a linear rate;
   - If the barr is fully depleted, the amount of time to wait before the automatic recharge is greater;
 ### Mana Barr
-  - Created with a series of images, each one representing, aproximately
+  - Created with a series of images, each one representing, approximately
   - When charging, the images are displayed one after the other, thus creating the illusion of a charging progression.
   - The barr starts with an empty image (empty barr) and ends with a full magic flame (full barr);
-### Caracter Movement
+### Character Movement
   - Character is able to move through the Battle Field's grid using energy.
   - There is a cooldown time after the character has been moved;
-  - The Caracter is bound by the Battlefield limits, wich go from the first row of the grid to the center of the grid;
+  - The Character is bound by the Battlefield limits, which go from the first row of the grid to the center of the grid;
   - If the Player is performing other actions (ex: Charging or Blocking) he will be prevented from moving;
 ### Attack
-  - Attacks can be perfomed by consuming the amount of energy associated to that attack;
+  - Attacks can be performed by consuming the amount of energy associated to that attack;
   - Player has different types of attacks available to choose from;
   - The attack that is currently equipped is displayed by the HUD;
   - Each attack has a cooldown time before it can be used again;
@@ -35,8 +35,8 @@ This project builds upon another repository where a demo was developed in pygame
   - Player is unable to move when charging;
 ### Inputs 
 - Mapped from a DualSense controller;
-- L2: Switch the currently equiped attack to another energy consuming attack (it cycles back to the starting attack);
+- L2: Switch the currently equipped attack to another energy consuming attack (it cycles back to the starting attack);
 - L1: Charge Mana;
 - R2: Use Block;
-- R1: Use currently equiped attack;
+- R1: Use currently equipped attack;
 - Arrows: Character Movement;
