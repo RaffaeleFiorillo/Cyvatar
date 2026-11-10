@@ -14,5 +14,7 @@ namespace Cyvatar.src.Weapons
         public Vector2 Coo { get; set; }
 
         public abstract void Update();
+
+        public abstract void Draw();
     }
 }

@@ -15,8 +15,9 @@ namespace Cyvatar.src
         private IGameScene _currentInterface;
 
         public static GraphicsDevice GameGraphicsDevice;
-        public static int ScreenWidth = 1920;
-        public static int ScreenHeight = 1080;
+        public const int ScreenWidth = 1920;
+        public const int ScreenHeight = 1080;
+        public const float FPS = 60f;
 
         public GameInterfaceManager()
         {
@@ -29,7 +30,7 @@ namespace Cyvatar.src
             _graphics.PreferredBackBufferWidth = ScreenWidth;
             _graphics.PreferredBackBufferHeight = ScreenHeight;
             IsFixedTimeStep = true;
-            TargetElapsedTime = TimeSpan.FromSeconds(1.0 / 60.0);
+            TargetElapsedTime = TimeSpan.FromSeconds(1.0 / FPS);
             _graphics.ApplyChanges();
         }
 

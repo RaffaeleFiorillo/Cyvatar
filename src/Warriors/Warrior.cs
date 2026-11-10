@@ -31,6 +31,6 @@ namespace Cyvatar.src.Warriors
         /// <summary>
         /// Draws the warrior.
         /// </summary>
-        public abstract void Draw(SpriteBatch spriteBatch);
+        public abstract void Draw();
     }
 }

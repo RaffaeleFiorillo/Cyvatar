@@ -12,38 +12,42 @@ namespace Cyvatar.src.Warriors
 {
     public abstract class Player : Warrior
     {
-
-        /// === Visual ===
         protected Dictionary<string, Texture2D> Images = new Dictionary<string, Texture2D>
         {
-            {"idle", GameInterfaceManager.LoadImage(Path.Combine("Battle","Characters","BlackKnight","Idle.png"), scale:1.5f) },
-            {"charging", GameInterfaceManager.LoadImage(Path.Combine("Battle","Characters","BlackKnight","Charging.png"), scale:1.5f) },
-            {"block", GameInterfaceManager.LoadImage(Path.Combine("Battle","Characters","BlackKnight","Block.png"), scale:1.5f) },
-            {"attack", GameInterfaceManager.LoadImage(Path.Combine("Battle","Characters","BlackKnight","Magic.png"), scale:1.5f) },
+            {"idle", GameInterfaceManager.LoadImage(Path.Combine("Battle","Characters","BlackKnight","Idle.png")) },
+            {"charging", GameInterfaceManager.LoadImage(Path.Combine("Battle","Characters","BlackKnight","Charging.png")) },
+            {"block", GameInterfaceManager.LoadImage(Path.Combine("Battle","Characters","BlackKnight","Block.png")) },
+            {"attack", GameInterfaceManager.LoadImage(Path.Combine("Battle","Characters","BlackKnight","Magic.png")) },
         };
         protected string State = "idle";
         protected Vector2 Coo;
         protected ChargingAnimation chargingAnimation;
+        // Action mapping (button name → method)
+        protected Dictionary<string, System.Action> PlayerActions;
 
-        // === Stats ===
+        #region Stats
+
         public float MaxHp { get; protected set; } = 100f;
         public float Hp { get; protected set; }
-
         public float MaxEnergy { get; protected set; } = 100f;
         public float Energy { get; protected set; }
-
         public float MaxMana { get; protected set; } = 100f;
         public float Mana { get; protected set; } = 0f;
-
         public float MaxSkillPoints { get; protected set; } = 10f;
         public float SkillPoints { get; protected set; }
 
-        // === Movement ===
+        #endregion Stats
+
+        #region Movement
+
         protected float MovementEnergyCost = 10f;
         protected float MovementCurrentCooldown = 0f;
         protected float MovementTotalCooldown = 1.0f;
 
-        // === Energy ===
+        #endregion Movement
+
+        #region Energy
+
         protected float EnergyChargingSpeed = 15f;               // Energy per second
         protected float EnergyDepletionCooldown = 0f;
         protected float EnergyDepletionTotalCooldown = 2.0f;
@@ -51,16 +55,15 @@ namespace Cyvatar.src.Warriors
         protected float AttackEnergyChargingCooldownTime = 0f;
         protected float AttackEnergyChargingMaxTime = 1.5f;
 
-        // === Mana ===
+        #endregion Energy
+
+        #region Mana
+
         protected float ManaChargingSpeed = 40f;                 // Mana per second while charging
         protected float ManaDischargingSpeed = 20f;              // Mana per second when not charging
         protected float ManaConservationInterval = 0f;
 
-        // === Internal ===
-        protected float Dt = 0f;
-
-        // Action mapping (button name → method)
-        protected Dictionary<string, System.Action> PlayerActions;
+        #endregion Mana
 
         public Player() : base(2, 2) // Starting grid position
         {
@@ -74,6 +77,7 @@ namespace Cyvatar.src.Warriors
                 { "r1", Attack },
                 { "r2", Block }
             };
+            chargingAnimation = new ChargingAnimation(Coo);
         }
 
         // These will be properly implemented in a more concrete class (e.g. AttackPlayer)
@@ -83,7 +87,10 @@ namespace Cyvatar.src.Warriors
 
         public override void UpdatePixelCoordinates()
         {
-            Coo = new Vector2(X*128, Y*-100 + 505);
+            Coo = new Vector2(X*190, Y*-150 + 757);
+
+            if (chargingAnimation != null)
+                chargingAnimation.UpdateCoordinates(Coo);
         }
 
         protected virtual bool ManageMovement(List<string> pressedButtons)
@@ -105,7 +112,7 @@ namespace Cyvatar.src.Warriors
                 X--;
                 hasMoved = true;
             }
-            else if (X < PLAYER_FIELD_RANGE && pressedButtons.Contains("right"))
+            else if (X <= PLAYER_FIELD_RANGE && pressedButtons.Contains("right"))
             {
                 X++;
                 hasMoved = true;
@@ -115,9 +122,6 @@ namespace Cyvatar.src.Warriors
             {
                 MovementCurrentCooldown = MovementTotalCooldown;
                 AddEnergy(-MovementEnergyCost);
-
-                if (chargingAnimation != null)
-                    chargingAnimation.Position = new Vector2(Coo.X - 130, Coo.Y - 140);
             }
 
             return hasMoved;
@@ -129,7 +133,7 @@ namespace Cyvatar.src.Warriors
 
             if (Mana < MaxMana && chargingAnimation != null && chargingAnimation.CurrentFrame > 2)
             {
-                AddMana(ManaChargingSpeed * Dt);
+                AddMana(ManaChargingSpeed * BattleScene.dt);
 
                 if (Mana >= MaxMana)
                 {
@@ -144,7 +148,7 @@ namespace Cyvatar.src.Warriors
             if (Energy <= 0 && EnergyDepletionCooldown <= EnergyDepletionTotalCooldown * 0.5f)
             {
                 State = "idle";
-                EnergyDepletionCooldown += Dt;
+                EnergyDepletionCooldown += BattleScene.dt;
                 return;
             }
 
@@ -156,12 +160,12 @@ namespace Cyvatar.src.Warriors
             if (Energy > 0)
             {
                 State = "block";
-                AddEnergy(-BlockEnergyConsumptionSpeed * Dt);
+                AddEnergy(-BlockEnergyConsumptionSpeed * BattleScene.dt);
                 return;
             }
 
             State = "idle";
-            EnergyDepletionCooldown += Dt;
+            EnergyDepletionCooldown += BattleScene.dt;
         }
 
         public virtual void Act(List<string> pressedButtons)
@@ -194,7 +198,7 @@ namespace Cyvatar.src.Warriors
             }
         }
 
-        public virtual void Update(float dt)
+        public virtual void Update()
         {
             MovementCurrentCooldown -= BattleScene.dt;
             EnergyDepletionCooldown -= BattleScene.dt;
@@ -217,15 +221,15 @@ namespace Cyvatar.src.Warriors
             }
         }
 
-        public override void Draw(SpriteBatch screen)
+        public override void Draw()
         {
             if (Images.ContainsKey(State))
-                screen.Draw(Images[State], Coo, Color.White);
+                GraphicManager.Screen.Draw(Images[State], Coo, Color.White);
             else
                 throw new Exception($"Player has  invalid State: {State}");
 
-            if (State == "charging" && chargingAnimation != null)
-                chargingAnimation.Draw(screen);
+            if (State == "charging")
+                chargingAnimation.Draw(GraphicManager.Screen);
         }
     }
 
@@ -233,48 +237,40 @@ namespace Cyvatar.src.Warriors
     {
         private List<Texture2D> _frames = new();
         private float _currentFrame = 0f;
+        private const float _frameSpeed = 25f;
         private bool _firstLoop = true;
+        private const int _frameCount = 47;
+        private readonly string _framesPath = Path.Combine("Battle", "Characters", "Charging");
 
-        public Vector2 Position { get; set; }
+        private Vector2 Coo { get; set; }
         public int CurrentFrame { get => (int)_currentFrame; }
 
-        public ChargingAnimation(GraphicsDevice graphicsDevice, string folder, int frameCount, Vector2 position, Point? size = null)
+        public ChargingAnimation(Vector2 playerPosition)
         {
-            Position = position;
+            UpdateCoordinates(playerPosition);
+            _frames = Enumerable.Range(0, _frameCount).Select(
+                i => GameInterfaceManager.LoadImage(Path.Combine(_framesPath, $"{i}.png"), scale: 1.6f)
+            ).ToList();
+        }
 
-            // Load frames: 0.png → (frameCount-2).png
-            for (int i = 0; i < frameCount - 1; i++)
-            {
-                string path = Path.Combine(folder, $"{i}.png");
-                Texture2D texture = Texture2D.FromFile(graphicsDevice, path);
-
-                // Optional resizing (if you need it later)
-                // For now we just load the original size
-                _frames.Add(texture);
-            }
+        public void UpdateCoordinates(Vector2 playerPosition)
+        {
+            Coo = new Vector2(playerPosition.X - 205, playerPosition.Y - 195);
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            if (_frames.Count == 0) return;
-
             // Avoid displaying the empty frames (0 and 1) after the first loop
             if (!_firstLoop && _currentFrame < 2f)
                 _currentFrame = 2f;
-
             // After frame 2 we consider the animation past the first loop
-            if (_currentFrame > 2f)
+            else if (_currentFrame > 2f)
                 _firstLoop = false;
-            
 
-            int frameIndex = (int)_currentFrame;
-            if (frameIndex >= _frames.Count)
-                frameIndex = _frames.Count - 1;
+            spriteBatch.Draw(_frames[(int)_currentFrame], Coo, Color.White);
 
-            spriteBatch.Draw(_frames[frameIndex], Position, Color.White);
-
-            // Advance animation
-            _currentFrame = (_currentFrame + 0.2f) % _frames.Count;
+            // Advance animation withing the boundaries of the existing frames
+            _currentFrame = (_currentFrame + _frameSpeed*BattleScene.dt) % _frames.Count;
         }
 
         public void Reset()
@@ -283,5 +279,4 @@ namespace Cyvatar.src.Warriors
             _firstLoop = true;
         }
     }
-
 }

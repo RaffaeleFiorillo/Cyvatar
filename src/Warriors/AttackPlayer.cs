@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Cyvatar.src.Weapons;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Cyvatar.src.Weapons;
+using static System.Net.WebRequestMethods;
 
 namespace Cyvatar.src.Warriors
 {
@@ -52,7 +53,7 @@ namespace Cyvatar.src.Warriors
 
             // Load attack pose (overrides the default "attack" image)
             // You should load this properly with your content loading system
-            Images["attack"] = GameInterfaceManager.LoadImage(Path.Combine("Battle", "Characters", "BlackKnight", "Shooting.png"), scale: 1.5f);
+            Images["attack"] = GameInterfaceManager.LoadImage(Path.Combine("Battle", "Characters", "BlackKnight", "Shooting.png"));
 
             // Load weapon image
             WeaponImage = GameInterfaceManager.LoadImage(Path.Combine("Battle", "Weapons", $"{weaponName}", $"{weaponLevel}.png"), scale: 0.6f);
@@ -115,37 +116,35 @@ namespace Cyvatar.src.Warriors
         {
             // Switch attack mode with L2
             if (pressedButtons.Contains("l2"))
+            {
+                // Only Switch to the next attack mode if the L2 button has been released
                 if (!AlreadySwitchedAttackMode)
                 {
                     CurrentAttackMode = (CurrentAttackMode + 1) % (AvailableAttackModes + 1);
                     AlreadySwitchedAttackMode = true;
                 }
-            else
+            } else
                 AlreadySwitchedAttackMode = false;
 
             base.Act(pressedButtons);
         }
 
-        public override void Draw(SpriteBatch spriteBatch)
+        public override void Draw()
         {
             // Draw HUD first
-            Hud?.Draw(spriteBatch);
+            Hud?.Draw(GraphicManager.Screen);
 
             // Draw player body
-            base.Draw(spriteBatch);
+            base.Draw();
 
             // Draw weapon when attacking
             if (State == "attack" && WeaponImage != null)
-            {
-                spriteBatch.Draw(WeaponImage, WeaponCoo, Color.White);
-            }
+                GraphicManager.Screen.Draw(WeaponImage, WeaponCoo, Color.White);
 
             // Draw all damagers (bullets, projectiles, etc.)
             foreach (var damager in Damagers)
-            {
                 // Assuming damager has a Draw method (you will create a base class later)
-                // ((Damager)damager).Draw(spriteBatch);
-            }
+                damager.Draw();
         }
     }
 }

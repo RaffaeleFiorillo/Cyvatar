@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Diagnostics;
 
 namespace Cyvatar.src.Weapons.BlasterAttacks
 {
@@ -14,18 +15,18 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
         // Current animation frame
         public float CurrentFrame { get; set; } = 0;
 
-        protected Bullet(Vector2 coo)
+        protected Bullet(Vector2 playerCoo, int blasterLevel)
         {
-            Coo = coo;
+            Coo = new Vector2(playerCoo.X+180 + 30*blasterLevel, playerCoo.Y + 85);
         }
 
         // Each child must implement these methods
         public abstract Texture2D GetFrame();
 
         // Draw bullet using MonoGame's SpriteBatch
-        public virtual void Draw(SpriteBatch screen)
+        public override void Draw()
         {
-            screen.Draw(GetFrame(), Coo, Color.White);
+            GraphicManager.Screen.Draw(GetFrame(), Coo, Color.White);
         }
     }
 
@@ -41,7 +42,7 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
         public static int EnergyCost = 30;  // Energy consumed by shooting a Bolt (Jolts)
         public static float CooldownTime = 3f; // Time to wait before the next Bolt can be shot (Seconds)
 
-        public BoltBullet(Vector2 coo) : base(coo){}
+        public BoltBullet(Vector2 playerCoo, int blasterLevel) : base(playerCoo, blasterLevel) {}
 
         public override Texture2D GetFrame()
         {
@@ -59,7 +60,7 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
     {
         public const string Name = "Electron";
         private static string _framesPath = Path.Combine("Battle", "Weapons", "Blaster", "Electron");
-        private static readonly List<Texture2D> Frames = Enumerable.Range(0, 5).Select(
+        private static readonly List<Texture2D> Frames = Enumerable.Range(0, 6).Select(
             i => GameInterfaceManager.LoadImage(Path.Combine(_framesPath, $"{i}.png"), scale: 2.0f)
         ).ToList();
         private static int Speed = 1000;      // Speed of the Bolt (pixel/Second)
@@ -67,7 +68,7 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
         public static int EnergyCost = 1;  // Energy consumed by shooting a Bolt (Jolts)
         public static float CooldownTime = 0.06f; // Time to wait before the next Bolt can be shot (Seconds)
 
-        public ElectronBullet(Vector2 coo) : base(coo) { }
+        public ElectronBullet(Vector2 playerCoo, int blasterLevel) : base(playerCoo, blasterLevel) { }
 
         public override Texture2D GetFrame()
         {
@@ -85,7 +86,7 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
     {
         public const string Name = "Quantum";
         private static string _framesPath = Path.Combine("Battle", "Weapons", "Blaster", "Quantum");
-        private static readonly List<Texture2D> Frames = Enumerable.Range(0, 5).Select(
+        private static readonly List<Texture2D> Frames = Enumerable.Range(0, 7).Select(
             i => GameInterfaceManager.LoadImage(Path.Combine(_framesPath, $"{i}.png"), scale: 2.0f)
         ).ToList();
         private static int Speed = 300;      // Speed of the Bolt (pixel/Second)
@@ -93,7 +94,7 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
         public static int EnergyCost = 30;  // Energy consumed by shooting a Bolt (Jolts)
         public static float CooldownTime = 3f; // Time to wait before the next Bolt can be shot (Seconds)
 
-        public QuantumBullet(Vector2 coo) : base(coo) { }
+        public QuantumBullet(Vector2 playerCoo, int blasterLevel) : base(playerCoo, blasterLevel) { }
 
         public override Texture2D GetFrame()
         {
@@ -102,8 +103,19 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
 
         public override void Update()
         {
-            CurrentFrame = (CurrentFrame + FrameSpeed * BattleScene.dt) % Frames.Count;
-            Coo = new Vector2(Coo.X + Speed * BattleScene.dt, Coo.Y);
+            CurrentFrame += FrameSpeed * BattleScene.dt;
+            if (CurrentFrame < Frames.Count-1)
+                Coo = new Vector2(Coo.X + Speed * BattleScene.dt, Coo.Y);
+            else if (Random. Shared.NextDouble() > 0.75f)
+            {
+                // Quantum bullet can switch between 4 rows where Y = 550, 450, 350, 250
+                // 
+                int randomRow = Random.Shared.Next(0, 4);
+                Coo = new Vector2(Coo.X + Speed * BattleScene.dt, randomRow*150 + 440);
+                CurrentFrame = 0;
+            }
+            else
+                CurrentFrame = 0;
         }
     }
 }

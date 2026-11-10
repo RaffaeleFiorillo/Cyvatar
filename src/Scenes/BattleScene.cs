@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace Cyvatar.src
 {
@@ -50,7 +51,8 @@ namespace Cyvatar.src
 
         public void Update(GameTime gameTime)
         {
-            BattleScene.dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            // This Delta Time value will be used by all entities that this GameScene manages
+            dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             // --- Input ---
             var keyboard = Keyboard.GetState();
@@ -64,20 +66,20 @@ namespace Cyvatar.src
 
             // Player actions
             _player.Act(Controller.GetPressed());
-            _player.Update(dt);
+            _player.Update();
         }
 
-        public void Draw(SpriteBatch spriteBatch)
+        public void Draw(SpriteBatch screen)
         {
             // Background
-            spriteBatch.Draw(_background, Vector2.Zero, Color.White);
+            GraphicManager.Screen.Draw(_background, Vector2.Zero, Color.White);
 
             // Player
-            _player.Draw(spriteBatch);
+            _player.Draw();
 
             // Front base (bottom bar)
             int screenHeight = _graphicsDevice.Viewport.Height;
-            spriteBatch.Draw(_frontBase, new Vector2(0, screenHeight - _frontBase.Height), Color.White);
+            GraphicManager.Screen.Draw(_frontBase, new Vector2(0, screenHeight - _frontBase.Height), Color.White);
         }
 
         public string? GetNextScene()

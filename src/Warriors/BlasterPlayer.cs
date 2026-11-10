@@ -31,14 +31,14 @@ namespace Cyvatar.src.Warriors
         // Updates weapon position
         protected override void UpdateWeaponCoo()
         {
-            WeaponCoo = new Vector2(Coo.X + 90,Coo.Y + 35);
+            WeaponCoo = new Vector2(Coo.X + 135,Coo.Y + 55);
         }
 
         // Attack mode 1: Big Bolt of Electricity
         private void AttackMode1()
         {
             ShootingCurrentCooldownTime = BoltBullet.CooldownTime;
-            Damagers.Add(new BoltBullet(new Vector2(Coo.X + 120 + 15 * WeaponLevel, Coo.Y + 45)));
+            Damagers.Add(new BoltBullet(Coo, WeaponLevel));
             AddEnergy(-BoltBullet.EnergyCost);
         }
 
@@ -46,7 +46,7 @@ namespace Cyvatar.src.Warriors
         private void AttackMode2()
         {
             ShootingCurrentCooldownTime = ElectronBullet.CooldownTime;
-            Damagers.Add(new ElectronBullet(new Vector2(Coo.X + 120 + 15 * WeaponLevel, Coo.Y + 45)));
+            Damagers.Add(new ElectronBullet(Coo, WeaponLevel));
             AddEnergy(-ElectronBullet.EnergyCost);
         }
 
@@ -54,7 +54,7 @@ namespace Cyvatar.src.Warriors
         private void AttackMode3()
         {
             ShootingCurrentCooldownTime = QuantumBullet.CooldownTime;
-            Damagers.Add(new QuantumBullet(new Vector2(Coo.X + 120 + 15 * WeaponLevel, Coo.Y + 45)));
+            Damagers.Add(new QuantumBullet(Coo, WeaponLevel));
             AddEnergy(-QuantumBullet.EnergyCost);
         }
 
@@ -71,28 +71,23 @@ namespace Cyvatar.src.Warriors
             if (ShootingCurrentCooldownTime <= 0 && Energy > 0)
             {
                 AttackModes[CurrentAttackMode]();
-
                 AttackEnergyChargingCooldownTime = AttackEnergyChargingMaxTime;
-                    // Remove bullets that have left the screen
-                int screenWidth =
-                    GameInterfaceManager.ScreenWidth;
 
-                Damagers.RemoveAll(damager => damager.Coo.X >= screenWidth);
+                // Remove bullets that have left the screen
+                Damagers.RemoveAll(damager => damager.Coo.X >= GameInterfaceManager.ScreenWidth);
             }
         }
 
-        public override void Update(float dt)
+        public override void Update()
         {
-            base.Update(dt);
+            base.Update();
 
             // Update all active bullets
             foreach (var bullet in Damagers)
-            {
                 bullet.Update();
-            }
 
             // Reduce shooting cooldown
-            ShootingCurrentCooldownTime -= dt;
+            ShootingCurrentCooldownTime -= BattleScene.dt;
         }
     }
 }

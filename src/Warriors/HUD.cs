@@ -12,6 +12,10 @@ namespace Cyvatar.src.Warriors
     public class HUD
     {
         private readonly AttackPlayer _player;
+        private readonly Vector2 _attackModeIconCoo = new Vector2(25, 54);
+        private readonly Vector2 _statsImageCoo = new Vector2(0, 0);
+        private readonly Vector2 _manaBarrImageCoo = new Vector2(169, 51);
+        private readonly Vector2 _taroksHudImageCoo = new Vector2(732, 0);
 
         #region Images
 
@@ -25,15 +29,13 @@ namespace Cyvatar.src.Warriors
         #region HP
 
         private Color _hpColor = Color.Lime;
-        private const int HpBarMaxSize = 355;
-        private Rectangle _hpRect = new Rectangle(115, 10, 355, 15);
+        private const int HpBarMaxSize = 537;
+        private Rectangle _hpRect = new Rectangle(169, 10, HpBarMaxSize, 25);
         private readonly Dictionary<string, Color> _hpColors = new()
         {
             { "max_life", new Color(0, 255, 70) },
             { "mid_life", new Color(230, 230, 100) },
-            { "low",     new Color(255, 0, 0) },
-            { "max_energy", new Color(0, 255, 255) },
-            { "mid_energy", new Color(0, 0, 250) }
+            { "low",     new Color(255, 0, 0) }
         };
 
         #endregion
@@ -41,8 +43,8 @@ namespace Cyvatar.src.Warriors
         #region Energy
 
         private Color _energyColor = Color.Cyan;
-        private const int EnergyBarMaxSize = 330;
-        private Rectangle _energyRect = new Rectangle(110, 27, 330, 10);
+        private const int EnergyBarMaxSize = 494;
+        private Rectangle _energyRect = new Rectangle(169, 40, EnergyBarMaxSize, 20);
 
         #endregion
 
@@ -64,7 +66,7 @@ namespace Cyvatar.src.Warriors
 
             // Load mana bar frames (0 to 17)
             for (int i = 0; i < 18; i++)
-                _manaBarImages[i] = GameInterfaceManager.LoadImage(Path.Combine("Battle", "HUD", "ManaBarr", $"{i}.png"));
+                _manaBarImages[i] = GameInterfaceManager.LoadImage(Path.Combine("Battle", "HUD", "ManaBarr", $"{i}.png"), size: new Vector2(450, 150));
 
             // Load attack mode icons
             for (int i = 0; i < player.AttackModesNames.Length; i++)
@@ -72,7 +74,7 @@ namespace Cyvatar.src.Warriors
                 string modeName = player.AttackModesNames[i];
                 string path = Path.Combine("Battle", "Weapons", player.WeaponName, modeName, "0.png");
 
-                _attackModeImages[i] = GameInterfaceManager.LoadImage(path);
+                _attackModeImages[i] = GameInterfaceManager.LoadImage(path, scale: 4.2f);
             }
         }
 
@@ -95,8 +97,7 @@ namespace Cyvatar.src.Warriors
             float percentage = _player.Energy / _player.MaxEnergy;
 
             // Simple lerp between blue and cyan
-            _energyColor = Color.Lerp(new Color(0, 0, 250), new Color(0, 255, 255), percentage);
-
+            _energyColor = Color.Lerp(Color.Blue, Color.Cyan, percentage);
             _energyRect.Width = (int)(percentage * EnergyBarMaxSize);
         }
 
@@ -114,18 +115,17 @@ namespace Cyvatar.src.Warriors
             GraphicManager.DrawRectangle(_energyRect, _energyColor);
 
             // Main HUD frame
-            screen.Draw(_playerHudImage, new Vector2(0, 0), Color.White);
+            screen.Draw(_playerHudImage, _statsImageCoo, Color.White);
 
             // Current attack mode icon
-            if (_attackModeImages.ContainsKey(_player.CurrentAttackMode))
-                screen.Draw(_attackModeImages[_player.CurrentAttackMode], new Vector2(22, 39), Color.White);
+            screen.Draw(_attackModeImages[_player.CurrentAttackMode], _attackModeIconCoo, Color.White);
 
 
             // Mana bar (frame based)
-            screen.Draw(_manaBarImages[_manaFrame], new Vector2(110, 30), Color.White);
+            screen.Draw(_manaBarImages[_manaFrame], _manaBarrImageCoo, Color.White);
 
             // Taroks HUD
-            screen.Draw(_taroksHudImage, new Vector2(485, 0), Color.White);
+            screen.Draw(_taroksHudImage, _taroksHudImageCoo, Color.White);
         }
     }
 }
