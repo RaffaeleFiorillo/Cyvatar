@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Diagnostics;
+using Cyvatar.src.GameScenes;
 
 namespace Cyvatar.src.Weapons.BlasterAttacks
 {
@@ -35,7 +36,7 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
         public const string Name = "Bolt";
         private static string _framesPath = Path.Combine("Battle", "Weapons", "Blaster", "Bolt");
         private static readonly List<Texture2D> Frames = Enumerable.Range(0, 5).Select(
-            i => GameInterfaceManager.LoadImage(Path.Combine(_framesPath, $"{i}.png"), scale: 2.0f)
+            i => GameSceneManager.LoadImage(Path.Combine(_framesPath, $"{i}.png"), scale: 2.0f)
         ).ToList();
         private static int Speed = 300;      // Speed of the Bolt (pixel/Second)
         private static int FrameSpeed = 25;  // Time between each frame of the Bolt animation (Frame/Second)
@@ -61,7 +62,7 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
         public const string Name = "Electron";
         private static string _framesPath = Path.Combine("Battle", "Weapons", "Blaster", "Electron");
         private static readonly List<Texture2D> Frames = Enumerable.Range(0, 6).Select(
-            i => GameInterfaceManager.LoadImage(Path.Combine(_framesPath, $"{i}.png"), scale: 2.0f)
+            i => GameSceneManager.LoadImage(Path.Combine(_framesPath, $"{i}.png"), scale: 2.0f)
         ).ToList();
         private static int Speed = 1000;      // Speed of the Bolt (pixel/Second)
         private static int FrameSpeed = 20;  // Time between each frame of the Bolt animation (Frame/Second)
@@ -87,7 +88,7 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
         public const string Name = "Quantum";
         private static string _framesPath = Path.Combine("Battle", "Weapons", "Blaster", "Quantum");
         private static readonly List<Texture2D> Frames = Enumerable.Range(0, 7).Select(
-            i => GameInterfaceManager.LoadImage(Path.Combine(_framesPath, $"{i}.png"), scale: 2.0f)
+            i => GameSceneManager.LoadImage(Path.Combine(_framesPath, $"{i}.png"), scale: 2.0f)
         ).ToList();
         private static int Speed = 300;      // Speed of the Bolt (pixel/Second)
         private static int FrameSpeed = 25;  // Time between each frame of the Bolt animation (Frame/Second)
@@ -106,7 +107,7 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
             CurrentFrame += FrameSpeed * BattleScene.dt;
             if (CurrentFrame < Frames.Count-1)
                 Coo = new Vector2(Coo.X + Speed * BattleScene.dt, Coo.Y);
-            else if (Random. Shared.NextDouble() > 0.75f)
+            else if (Random.Shared.NextDouble() > 0.75f)
             {
                 // Quantum bullet can switch between 4 rows where Y = 550, 450, 350, 250
                 // 

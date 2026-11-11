@@ -1,2 +1,2 @@
-﻿using var game = new Cyvatar.src.GameInterfaceManager();
+﻿using var game = new Cyvatar.src.GameSceneManager();
 game.Run();

@@ -11,45 +11,45 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 
-namespace Cyvatar.src
+namespace Cyvatar.src.GameScenes
 {
-    public class BattleScene : IGameScene
+    public class BattleScene : GameScene
     {
-        public string Link => "Battle";
-
         // Assets
         private Texture2D _background;
         private Texture2D _frontBase;
 
         // Game objects
         // private BlasterPlayer _player;
-        private Player _player;
+        private BasePlayer _player;
+
+        private List<Warrior> Enemies = new List<Warrior>();
 
         // Transition control
-        private string? _nextScene = null;
+        private GameSceneLink _nextScene;
 
-        private readonly GraphicsDevice _graphicsDevice;
-        private readonly ContentManager _content;   // Optional if you use Content Pipeline
+        
+        // private readonly ContentManager _content;   // Optional if you use Content Pipeline
+
         public DualSenseController Controller { get; set; } = new DualSenseController();
 
         public static float dt = 0;
 
-        public BattleScene(GraphicsDevice graphicsDevice)
-        {
-            _graphicsDevice = graphicsDevice;
-        }
+        public BattleScene(GraphicsDevice graphicsDevice) : base(graphicsDevice, GameSceneLink.LBattleScene) { }
 
-        public void LoadContent()
+        public override void LoadContent()
         {
             // === Load images (runtime loading style) ===
-            _background = GameInterfaceManager.LoadImage(Path.Combine("Battle", "Fields", "GrassField", "Field.png"));
-            _frontBase = GameInterfaceManager.LoadImage(Path.Combine("Battle", "Fields", "GrassField", "Base.png"));
+            _background = GameSceneManager.LoadImage(Path.Combine("Battle", "Fields", "GrassField", "Field.png"));
+            _frontBase = GameSceneManager.LoadImage(Path.Combine("Battle", "Fields", "GrassField", "Base.png"));
 
             // Create player
             _player = new BlasterPlayer();
+
+            Enemies.Add(new SpearGoblin());
         }
 
-        public void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
             // This Delta Time value will be used by all entities that this GameScene manages
             dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -60,16 +60,18 @@ namespace Cyvatar.src
             // Example of quitting the battle
             if (keyboard.IsKeyDown(Keys.Escape))
             {
-                _nextScene = "OpenWorld";          // Return to open world
+                _nextScene = GameSceneLink.LOpenWorld;          // Return to open world
                 return;
             }
 
             // Player actions
             _player.Act(Controller.GetPressed());
             _player.Update();
+
+            for (int i = 0; i < Enemies.Count; i++) { Enemies[i].Update(); }
         }
 
-        public void Draw(SpriteBatch screen)
+        public override void Draw()
         {
             // Background
             GraphicManager.Screen.Draw(_background, Vector2.Zero, Color.White);
@@ -77,16 +79,18 @@ namespace Cyvatar.src
             // Player
             _player.Draw();
 
+            // Drawing the Enemies
+            for (int i=0; i < Enemies.Count; i++) { Enemies[i].Draw(); }
+
             // Front base (bottom bar)
             int screenHeight = _graphicsDevice.Viewport.Height;
             GraphicManager.Screen.Draw(_frontBase, new Vector2(0, screenHeight - _frontBase.Height), Color.White);
         }
 
-        public string? GetNextScene()
+        public override void SetNextScene()
         {
-            string? next = _nextScene;
-            _nextScene = null;     // Reset after reading
-            return next;
+            base.SetNextScene();
+            GameSceneLink next = _nextScene;
         }
     }
 }
