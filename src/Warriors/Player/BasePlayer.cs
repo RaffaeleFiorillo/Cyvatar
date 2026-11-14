@@ -27,8 +27,7 @@ namespace Cyvatar.src.Warriors
 
         #region Stats
 
-        public float MaxHp { get; protected set; } = 100f;
-        public float Hp { get; protected set; }
+        public const float MaxHp = 100f;
         public float MaxEnergy { get; protected set; } = 100f;
         public float Energy { get; protected set; }
         public float MaxMana { get; protected set; } = 100f;
@@ -65,9 +64,8 @@ namespace Cyvatar.src.Warriors
 
         #endregion Mana
 
-        public BasePlayer() : base(2, 2) // Starting grid position
+        public BasePlayer() : base(2, 2, MaxHp) // Starting grid position
         {
-            Hp = MaxHp;
             Energy = MaxEnergy;
             SkillPoints = MaxSkillPoints;
 
@@ -78,6 +76,8 @@ namespace Cyvatar.src.Warriors
                 { "r2", Block }
             };
             chargingAnimation = new ChargingAnimation(Coo);
+
+            HitBox = new Rectangle((int)Coo.X, (int)Coo.Y+100, 160, 120);
         }
 
         /// <summary>
@@ -166,6 +166,7 @@ namespace Cyvatar.src.Warriors
             if (hasMoved)
             {
                 MovementCurrentCooldown = MovementTotalCooldown;
+                HitBox = new Rectangle((int)Coo.X, (int)Coo.Y + 100, 160, 120);
                 AddEnergy(-MovementEnergyCost);
             }
 

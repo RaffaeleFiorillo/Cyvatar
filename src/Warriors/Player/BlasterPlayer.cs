@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Cyvatar.src.Weapons.BlasterAttacks;
 using Cyvatar.src.GameScenes;
+using Cyvatar.src.Weapons;
 
 namespace Cyvatar.src.Warriors
 {
@@ -39,7 +40,7 @@ namespace Cyvatar.src.Warriors
         private void AttackMode1()
         {
             ShootingCurrentCooldownTime = BoltBullet.CooldownTime;
-            Damagers.Add(new BoltBullet(Coo, WeaponLevel));
+            BattleScene.Damagers.Add(new BoltBullet(Coo, WeaponLevel));
             AddEnergy(-BoltBullet.EnergyCost);
         }
 
@@ -47,7 +48,7 @@ namespace Cyvatar.src.Warriors
         private void AttackMode2()
         {
             ShootingCurrentCooldownTime = ElectronBullet.CooldownTime;
-            Damagers.Add(new ElectronBullet(Coo, WeaponLevel));
+            BattleScene.Damagers.Add(new ElectronBullet(Coo, WeaponLevel));
             AddEnergy(-ElectronBullet.EnergyCost);
         }
 
@@ -55,13 +56,21 @@ namespace Cyvatar.src.Warriors
         private void AttackMode3()
         {
             ShootingCurrentCooldownTime = QuantumBullet.CooldownTime;
-            Damagers.Add(new QuantumBullet(Coo, WeaponLevel));
+            BattleScene.Damagers.Add(new QuantumBullet(Coo, WeaponLevel));
             AddEnergy(-QuantumBullet.EnergyCost);
         }
 
         // Attack mode 4: Not implemented yet
         private void AttackMode4()
         {
+        }
+
+        public override void TakeDamageFrom(Damager damager)
+        {
+            if (State != PlayerState.Block)
+            {
+                AddHp(-damager.Damage);
+            }
         }
 
         protected override void Attack()
@@ -75,18 +84,13 @@ namespace Cyvatar.src.Warriors
                 AttackEnergyChargingCooldownTime = AttackEnergyChargingMaxTime;
 
                 // Remove bullets that have left the screen
-                Damagers.RemoveAll(damager => damager.Coo.X >= GameSceneManager.ScreenWidth);
+                BattleScene.Damagers.RemoveAll(damager => damager.Coo.X >= GameSceneManager.ScreenWidth);
             }
         }
 
         public override void Update()
         {
             base.Update();
-
-            // Update all active bullets
-            foreach (var bullet in Damagers)
-                bullet.Update();
-
             // Reduce shooting cooldown
             ShootingCurrentCooldownTime -= BattleScene.dt;
         }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Cyvatar.src.Weapons;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 
@@ -11,6 +12,8 @@ namespace Cyvatar.src.Warriors
         /// </summary>
         public int FieldRange = 3;
 
+        public float Hp;
+
         public int X { get => _X; set { _X = value; UpdatePixelCoordinates(); } }
         private int _X;
 
@@ -21,17 +24,30 @@ namespace Cyvatar.src.Warriors
         /// Pixel coordinates that allow to display the warrior's image on the screen.
         /// </summary>
         protected Vector2 Coo;
+        public Rectangle HitBox;
 
-        protected Warrior(int x, int y)
+        protected Warrior(int x, int y, float hp)
         {
-            this.X = x;
-            this.Y = y;
+            X = x;
+            Y = y;
+            Hp = hp;
         }
 
         /// <summary>
         /// Converts the grid position (X, Y) into actual pixel coordinates on the screen.
         /// </summary>
         public abstract void UpdatePixelCoordinates();
+
+        public bool CollidesWith(Rectangle otherBounds)
+        {
+            return HitBox.Intersects(otherBounds);
+        }
+
+        /// <summary>
+        /// Defines the logic of taking damage from a Damager.
+        /// </summary>
+        /// <param name="damager"></param>
+        public abstract void TakeDamageFrom(Damager damager);
 
         /// <summary>
         /// Updates the warrior every frame.

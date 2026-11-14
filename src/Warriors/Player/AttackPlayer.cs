@@ -31,8 +31,6 @@ namespace Cyvatar.src.Warriors
         public int CurrentAttackMode = 0;
         public bool AlreadySwitchedAttackMode = false;
 
-        public List<Damager> Damagers = new List<Damager>();         // Replace 'object' later with a real Damager/Bullet base class
-
         public float ShootingTotalCooldown = 1.0f;
         public float ShootingCurrentCooldownTime = 0f;
 
@@ -140,11 +138,6 @@ namespace Cyvatar.src.Warriors
             // Draw weapon when attacking
             if (State == PlayerState.Attack && WeaponImage != null)
                 GraphicManager.Screen.Draw(WeaponImage, WeaponCoo, Color.White);
-
-            // Draw all damagers (bullets, projectiles, etc.)
-            foreach (var damager in Damagers)
-                // Assuming damager has a Draw method (you will create a base class later)
-                damager.Draw();
         }
     }
 }

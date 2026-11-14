@@ -1,15 +1,17 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Cyvatar.src.Warriors;
+using Cyvatar.src.Weapons;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Cyvatar.src.Warriors;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Diagnostics;
 
 namespace Cyvatar.src.GameScenes
 {
@@ -23,7 +25,8 @@ namespace Cyvatar.src.GameScenes
         // private BlasterPlayer _player;
         private BasePlayer _player;
 
-        private List<Warrior> Enemies = new List<Warrior>();
+        public static List<Warrior> Enemies = new List<Warrior>();
+        public static List<Damager> Damagers = new List<Damager>();
 
         // Transition control
         private GameSceneLink _nextScene;
@@ -69,6 +72,50 @@ namespace Cyvatar.src.GameScenes
             _player.Update();
 
             for (int i = 0; i < Enemies.Count; i++) { Enemies[i].Update(); }
+
+            // Go through all Damagers on the Player's side
+            foreach (var damager in Damagers.Where(d => d.Type == OriginType.FriendlyFire))
+            {
+                // Updating the damager
+                if (damager.Coo.X > GameSceneManager.ScreenWidth)
+                {
+                    damager.ToBeDeleted = true;
+                    continue;
+                }
+                damager.Update();
+
+                // Collision Logic for Enemy-Damager
+                foreach (var enemy in Enemies)
+                {
+                    if (enemy.CollidesWith(damager.GetHitbox()))
+                    {
+                        enemy.TakeDamageFrom(damager);
+                        damager.ApplyHitEffect();
+                    }
+                }
+            }
+
+            // Go through all Damagers on the Enemies' side
+            foreach (var damager in Damagers.Where(d => d.Type == OriginType.EnemyFire))
+            {
+                // Updating the damager
+                if (damager.Coo.X > GameSceneManager.ScreenWidth)
+                {
+                    damager.ToBeDeleted = true;
+                    continue;
+                }
+                damager.Update();
+
+                // Collision Logic for Enemy-Damager
+                if (_player.CollidesWith(damager.GetHitbox()))
+                {
+                    _player.TakeDamageFrom(damager);
+                    damager.ApplyHitEffect();
+                }
+            }
+
+            // Remove all "dead" damagers
+            Damagers = Damagers.Where(d => !d.ToBeDeleted).ToList();
         }
 
         public override void Draw()
@@ -81,6 +128,9 @@ namespace Cyvatar.src.GameScenes
 
             // Drawing the Enemies
             for (int i=0; i < Enemies.Count; i++) { Enemies[i].Draw(); }
+
+            // Drawing the Damagers
+            for (int i = 0; i < Damagers.Count; i++) { Damagers[i].Draw(); }
 
             // Front base (bottom bar)
             int screenHeight = _graphicsDevice.Viewport.Height;

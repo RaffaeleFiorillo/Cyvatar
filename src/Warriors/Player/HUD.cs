@@ -80,7 +80,7 @@ namespace Cyvatar.src.Warriors
 
         public void UpdateHp()
         {
-            float percentage = _player.Hp / _player.MaxHp;
+            float percentage = _player.Hp / AttackPlayer.MaxHp;
 
             if (percentage > 0.75f)
                 _hpColor = _hpColors["max_life"];

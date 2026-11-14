@@ -16,7 +16,7 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
         // Current animation frame
         public float CurrentFrame { get; set; } = 0;
 
-        protected Bullet(Vector2 playerCoo, int blasterLevel)
+        protected Bullet(Vector2 playerCoo, int blasterLevel, float damage) : base(OriginType.FriendlyFire, damage)
         {
             Coo = new Vector2(playerCoo.X+180 + 30*blasterLevel, playerCoo.Y + 85);
         }
@@ -24,10 +24,17 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
         // Each child must implement these methods
         public abstract Texture2D GetFrame();
 
+        public override Rectangle GetHitbox()
+        {
+            // Example: adjust these values to match the sprite size
+            return new Rectangle((int)Coo.X+8, (int)Coo.Y+10, 50, 50);
+        }
+
         // Draw bullet using MonoGame's SpriteBatch
         public override void Draw()
         {
-            GraphicManager.Screen.Draw(GetFrame(), Coo, Color.White);
+            // GraphicManager.DrawRectangle(GetHitbox(), Color.Red);
+            GraphicManager.Screen.Draw(GetFrame(), Coo, Color.White);  
         }
     }
 
@@ -42,8 +49,14 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
         private static int FrameSpeed = 25;  // Time between each frame of the Bolt animation (Frame/Second)
         public static int EnergyCost = 30;  // Energy consumed by shooting a Bolt (Jolts)
         public static float CooldownTime = 3f; // Time to wait before the next Bolt can be shot (Seconds)
+        private const float _damage = 60;
 
-        public BoltBullet(Vector2 playerCoo, int blasterLevel) : base(playerCoo, blasterLevel) {}
+        public BoltBullet(Vector2 playerCoo, int blasterLevel) : base(playerCoo, blasterLevel, _damage) {}
+
+        public override void ApplyHitEffect()
+        {
+            ToBeDeleted = true;
+        }
 
         public override Texture2D GetFrame()
         {
@@ -53,7 +66,7 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
         public override void Update()
         {
             CurrentFrame = (CurrentFrame + FrameSpeed * BattleScene.dt) % Frames.Count;
-            Coo = new Vector2(Coo.X + Speed*BattleScene.dt, Coo.Y);
+            Coo.X += Speed*BattleScene.dt;
         }
     }
 
@@ -68,8 +81,20 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
         private static int FrameSpeed = 20;  // Time between each frame of the Bolt animation (Frame/Second)
         public static int EnergyCost = 1;  // Energy consumed by shooting a Bolt (Jolts)
         public static float CooldownTime = 0.06f; // Time to wait before the next Bolt can be shot (Seconds)
+        private const float _damage = 1;
 
-        public ElectronBullet(Vector2 playerCoo, int blasterLevel) : base(playerCoo, blasterLevel) { }
+        public ElectronBullet(Vector2 playerCoo, int blasterLevel) : base(playerCoo, blasterLevel, _damage) { }
+
+        public override void ApplyHitEffect()
+        {
+            ToBeDeleted = true;
+        }
+
+        public override Rectangle GetHitbox()
+        {
+            // Example: adjust these values to match the sprite size
+            return new Rectangle((int)Coo.X+10, (int)Coo.Y+10, 20, 20);
+        }
 
         public override Texture2D GetFrame()
         {
@@ -79,7 +104,7 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
         public override void Update()
         {
             CurrentFrame = (CurrentFrame + FrameSpeed * BattleScene.dt) % Frames.Count;
-            Coo = new Vector2(Coo.X + Speed * BattleScene.dt, Coo.Y);
+            Coo.X += Speed*BattleScene.dt;
         }
     }
 
@@ -95,7 +120,14 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
         public static int EnergyCost = 30;  // Energy consumed by shooting a Bolt (Jolts)
         public static float CooldownTime = 3f; // Time to wait before the next Bolt can be shot (Seconds)
 
-        public QuantumBullet(Vector2 playerCoo, int blasterLevel) : base(playerCoo, blasterLevel) { }
+        private const float _damage = 10;
+
+        public QuantumBullet(Vector2 playerCoo, int blasterLevel) : base(playerCoo, blasterLevel, _damage) { }
+
+        public override void ApplyHitEffect()
+        {
+            
+        }
 
         public override Texture2D GetFrame()
         {
@@ -109,10 +141,10 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
                 Coo = new Vector2(Coo.X + Speed * BattleScene.dt, Coo.Y);
             else if (Random.Shared.NextDouble() > 0.75f)
             {
+                Coo.X += Speed * BattleScene.dt;
                 // Quantum bullet can switch between 4 rows where Y = 550, 450, 350, 250
-                // 
                 int randomRow = Random.Shared.Next(0, 4);
-                Coo = new Vector2(Coo.X + Speed * BattleScene.dt, randomRow*150 + 440);
+                Coo.Y = randomRow * 150 + 440;
                 CurrentFrame = 0;
             }
             else
