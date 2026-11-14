@@ -12,6 +12,12 @@ namespace Cyvatar.src.Warriors
         /// </summary>
         public int FieldRange = 3;
 
+        /// <summary>
+        /// Flag that indicates if the player should be removed from the BattleScene.
+        /// It occurs when: Hp <= 0 AND DeathAnimation.HasEnded == true
+        /// </summary>
+        public bool IsDead = false;
+
         public float Hp;
 
         public int X { get => _X; set { _X = value; UpdatePixelCoordinates(); } }

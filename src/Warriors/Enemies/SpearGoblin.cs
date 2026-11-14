@@ -17,6 +17,8 @@ namespace Cyvatar.src.Warriors
     public class SpearGoblin : Warrior
     {
         private ThrowAnimation _throwAnimation;
+        private DeathAnimation _deathAnimation;
+
         private static Texture2D IdleImage;
         private readonly string ImagesPath = Path.Combine("Battle", "Characters", "Enemies", "SpearGoblin");
         private readonly Texture2D HpBarrBorder = GameSceneManager.LoadImage(Path.Combine("Battle", "Characters", "Enemies", "HpBarrBorder.png"));
@@ -41,6 +43,7 @@ namespace Cyvatar.src.Warriors
             float imageScale = 2.2f;
             IdleImage = GameSceneManager.LoadImage(Path.Combine(ImagesPath, "Idle.png"), scale: imageScale);
             _throwAnimation = new ThrowAnimation(Coo, imageScale);
+            _deathAnimation = new DeathAnimation(Coo, imageScale);
             UpdatePixelCoordinates();
             FieldRange = 3;
             HitBox = new Rectangle((int)Coo.X+20, (int)Coo.Y + 30, 100, 120);
@@ -52,6 +55,7 @@ namespace Cyvatar.src.Warriors
         {
             Coo = new Vector2(X*197, Y*-145 + 820);
             _throwAnimation?.UpdateCoordinates(Coo);
+            _deathAnimation?.UpdateCoordinates(Coo);
         }
 
         public override void TakeDamageFrom(Damager damager)
@@ -108,7 +112,9 @@ namespace Cyvatar.src.Warriors
         {
             MovingCooldownTime -= BattleScene.dt;
 
-            if (IsAttacking)
+            if (Hp <= 0)
+                _deathAnimation.Update(BattleScene.dt);
+            else if (IsAttacking)
             {
                 _throwAnimation.Update(BattleScene.dt);
 
@@ -143,7 +149,13 @@ namespace Cyvatar.src.Warriors
             GraphicManager.DrawRectangle(HpRectangle, HpColor);
             GraphicManager.Screen.Draw(HpBarrBorder, Coo, Color.White);
 
-            if (IsAttacking)
+            if (Hp <= 0)
+            {
+                _deathAnimation.Draw();
+                if (_deathAnimation.HasEnded)
+                    IsDead = true;
+            }
+            else if (IsAttacking)
                 _throwAnimation.Draw();
             else
                 GraphicManager.Screen.Draw(IdleImage, Coo, Color.White);
@@ -154,12 +166,32 @@ namespace Cyvatar.src.Warriors
     {
         public ThrowAnimation(Vector2 goblinPosition, float imageScale): base
             (
-                Path.Combine("Battle", "Characters", "Enemies", "SpearGoblin"), // Path to the frames
+                Path.Combine("Battle", "Characters", "Enemies", "SpearGoblin", "Throw"), // Path to the frames
                 goblinPosition,  // InitialPosition
                 6,               // FramesCount
                 6f,              // Frame Speed (F/s)
                 1.5f,            // Last Frame Time before animation Ends (s)
-                imageScale             // scale for the frame images in the animation
+                imageScale       // scale for the frame images in the animation
+            )
+        {
+        }
+
+        public override void UpdateCoordinates(Vector2 goblinPosition)
+        {
+            Coo = goblinPosition;
+        }
+    }
+
+    public class DeathAnimation: SimpleAnimation
+    {
+        public DeathAnimation(Vector2 goblinPosition, float imageScale) : base
+            (
+                Path.Combine("Battle", "Characters", "Enemies", "SpearGoblin", "Death"), // Path to the frames
+                goblinPosition,  // InitialPosition
+                8,               // FramesCount
+                6f,              // Frame Speed (F/s)
+                0.4f,            // Last Frame Time before animation Ends (s)
+                imageScale       // scale for the frame images in the animation
             )
         {
         }

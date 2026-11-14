@@ -56,6 +56,7 @@ namespace Cyvatar.src.GameScenes
         {
             // This Delta Time value will be used by all entities that this GameScene manages
             dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            // Debug.WriteLine(dt);
 
             // --- Input ---
             var keyboard = Keyboard.GetState();
@@ -116,6 +117,7 @@ namespace Cyvatar.src.GameScenes
 
             // Remove all "dead" damagers
             Damagers = Damagers.Where(d => !d.ToBeDeleted).ToList();
+            Enemies = Enemies.Where(e => !e.IsDead).ToList();
         }
 
         public override void Draw()
