@@ -51,7 +51,12 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
         public static float CooldownTime = 3f; // Time to wait before the next Bolt can be shot (Seconds)
         private const float _damage = 60;
 
-        public BoltBullet(Vector2 playerCoo, int blasterLevel) : base(playerCoo, blasterLevel, _damage) {}
+        /// <summary>
+        /// Sound played when this bullet is created.
+        /// </summary>
+        private static Sound sound = new Sound(Path.Combine("Weapons", "BoltSound.wav"));
+
+        public BoltBullet(Vector2 playerCoo, int blasterLevel) : base(playerCoo, blasterLevel, _damage) { sound.Play(); }
 
         public override void ApplyHitEffect()
         {
@@ -83,7 +88,16 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
         public static float CooldownTime = 0.06f; // Time to wait before the next Bolt can be shot (Seconds)
         private const float _damage = 1;
 
-        public ElectronBullet(Vector2 playerCoo, int blasterLevel) : base(playerCoo, blasterLevel, _damage) { }
+        /// <summary>
+        /// Sound played when this bullet is created.
+        /// </summary>
+        private static Sound sound = new Sound(Path.Combine("Weapons", "ElectronSound.wav"));
+
+        public ElectronBullet(Vector2 playerCoo, int blasterLevel) : base(playerCoo, blasterLevel, _damage) 
+        {
+            sound.Stop();
+            sound.Play(); 
+        }
 
         public override void ApplyHitEffect()
         {
@@ -119,10 +133,14 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
         private static int FrameSpeed = 25;  // Time between each frame of the Bolt animation (Frame/Second)
         public static int EnergyCost = 30;  // Energy consumed by shooting a Bolt (Jolts)
         public static float CooldownTime = 3f; // Time to wait before the next Bolt can be shot (Seconds)
-
         private const float _damage = 10;
 
-        public QuantumBullet(Vector2 playerCoo, int blasterLevel) : base(playerCoo, blasterLevel, _damage) { }
+        /// <summary>
+        /// Sound played when this bullet is created.
+        /// </summary>
+        private static Sound sound = new Sound(Path.Combine("Weapons", "QuantumSound.wav"));
+
+        public QuantumBullet(Vector2 playerCoo, int blasterLevel) : base(playerCoo, blasterLevel, _damage) { sound.Play(); }
 
         public override void ApplyHitEffect()
         {

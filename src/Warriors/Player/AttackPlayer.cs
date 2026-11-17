@@ -4,10 +4,6 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Net.WebRequestMethods;
 
 namespace Cyvatar.src.Warriors
 {
@@ -34,6 +30,8 @@ namespace Cyvatar.src.Warriors
         public float ShootingTotalCooldown = 1.0f;
         public float ShootingCurrentCooldownTime = 0f;
 
+        private Sound _switchAttackModeSound = new Sound(Path.Combine("Player", "ChangeAmmoSound.wav"));
+
         #endregion
 
         #region HUD
@@ -51,7 +49,7 @@ namespace Cyvatar.src.Warriors
 
             // Load attack pose (overrides the default "attack" image)
             // You should load this properly with your content loading system
-            Images[PlayerState.Attack] = GameSceneManager.LoadImage(Path.Combine("Battle", "Characters", "BlackKnight", "Shooting.png"));
+            Images[PlayerState.Attack] = GameSceneManager.LoadImage(Path.Combine("Battle", "Characters", "Player", "Shooting.png"));
 
             // Load weapon image
             WeaponImage = GameSceneManager.LoadImage(Path.Combine("Battle", "Weapons", $"{weaponName}", $"{weaponLevel}.png"), scale: 0.6f);
@@ -119,10 +117,16 @@ namespace Cyvatar.src.Warriors
                 if (!AlreadySwitchedAttackMode)
                 {
                     CurrentAttackMode = (CurrentAttackMode + 1) % (AvailableAttackModes + 1);
+                    _switchAttackModeSound.Play();
                     AlreadySwitchedAttackMode = true;
                 }
-            } else
+            }
+            else
+            {
+                _switchAttackModeSound.Stop();
                 AlreadySwitchedAttackMode = false;
+            }
+                
 
             base.Act(pressedButtons);
         }

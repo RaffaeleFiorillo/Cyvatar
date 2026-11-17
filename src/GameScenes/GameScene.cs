@@ -27,6 +27,11 @@ namespace Cyvatar.src.GameScenes
         /// </summary>
         public bool HasEnded = false;
 
+        /// <summary>
+        /// Delta time.
+        /// </summary>
+        public static float dt = 0;
+
         protected readonly GraphicsDevice _graphicsDevice;
 
         public GameScene(GraphicsDevice graphicsDevice, GameSceneLink link) 

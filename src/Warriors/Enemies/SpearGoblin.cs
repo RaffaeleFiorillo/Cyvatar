@@ -176,7 +176,7 @@ namespace Cyvatar.src.Warriors
         {
         }
 
-        public override void UpdateCoordinates(Vector2 goblinPosition)
+        public void UpdateCoordinates(Vector2 goblinPosition)
         {
             Coo = goblinPosition;
         }
@@ -196,7 +196,7 @@ namespace Cyvatar.src.Warriors
         {
         }
 
-        public override void UpdateCoordinates(Vector2 goblinPosition)
+        public void UpdateCoordinates(Vector2 goblinPosition)
         {
             Coo = goblinPosition;
         }

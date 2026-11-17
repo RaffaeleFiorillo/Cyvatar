@@ -14,7 +14,7 @@ namespace Cyvatar.src.Warriors
     public class BlasterPlayer : AttackPlayer
     {
         public BlasterPlayer(): base(
-            Path.Combine("Battle","Characters","BlackKnight","Shooting.png"),
+            Path.Combine("Battle","Characters", "Player", "Shooting.png"),
             "Blaster",
             1,
             new string[] { BoltBullet.Name, ElectronBullet.Name, QuantumBullet.Name }

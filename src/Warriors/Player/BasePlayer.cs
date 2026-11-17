@@ -1,13 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Cyvatar.src.GameScenes;
+using Cyvatar.src.Utils.Animations;
 
 namespace Cyvatar.src.Warriors
 {
@@ -15,13 +12,14 @@ namespace Cyvatar.src.Warriors
     {
         protected Dictionary<PlayerState, Texture2D> Images = new Dictionary<PlayerState, Texture2D>
         {
-            {PlayerState.Idle, GameSceneManager.LoadImage(Path.Combine("Battle","Characters","BlackKnight","Idle.png")) },
-            {PlayerState.Charge, GameSceneManager.LoadImage(Path.Combine("Battle","Characters","BlackKnight","Charging.png")) },
-            {PlayerState.Block, GameSceneManager.LoadImage(Path.Combine("Battle","Characters","BlackKnight","Block.png")) },
-            {PlayerState.Attack, GameSceneManager.LoadImage(Path.Combine("Battle","Characters","BlackKnight","Magic.png")) },
+            {PlayerState.Idle, GameSceneManager.LoadImage(Path.Combine("Battle","Characters","Player","Idle.png")) },
+            {PlayerState.Charge, GameSceneManager.LoadImage(Path.Combine("Battle","Characters","Player","Charging.png")) },
+            {PlayerState.Block, GameSceneManager.LoadImage(Path.Combine("Battle","Characters","Player","Block.png")) },
+            {PlayerState.Attack, GameSceneManager.LoadImage(Path.Combine("Battle","Characters","Player","Magic.png")) },
         };
         protected PlayerState State = PlayerState.Idle;
-        protected ChargingAnimation chargingAnimation;
+        protected AuraCharge auraCharge;
+        protected ForceFieldBarrier forceField;
         // Action mapping (button name → method)
         protected Dictionary<string, System.Action> PlayerActions;
 
@@ -75,8 +73,9 @@ namespace Cyvatar.src.Warriors
                 { "r1", Attack },
                 { "r2", Block }
             };
-            chargingAnimation = new ChargingAnimation(Coo);
 
+            auraCharge = new AuraCharge(Coo);
+            forceField = new ForceFieldBarrier(Coo);
             HitBox = new Rectangle((int)Coo.X, (int)Coo.Y+100, 160, 120);
         }
 
@@ -89,8 +88,8 @@ namespace Cyvatar.src.Warriors
         {
             Coo = new Vector2(X * 190, Y * -150 + 757);
 
-            if (chargingAnimation != null)
-                chargingAnimation.UpdateCoordinates(Coo);
+            auraCharge?.UpdateCoordinates(Coo);
+            forceField?.UpdateCoordinates(Coo);
         }
 
         #region Stats Alteration
@@ -133,8 +132,9 @@ namespace Cyvatar.src.Warriors
             // Return to idle if no special state is active
             if (State != PlayerState.SpecialAttack)
             {
+                auraCharge.Stop();
+                forceField.Stop();
                 State = PlayerState.Idle;
-                chargingAnimation?.Reset();
             }
         }
 
@@ -176,16 +176,17 @@ namespace Cyvatar.src.Warriors
         protected virtual void Charge()
         {
             State = PlayerState.Charge;
+            auraCharge.IsActive = true;
+            forceField.Stop();
 
-            if (Mana < MaxMana && chargingAnimation != null && chargingAnimation.CurrentFrame > 2)
-            {
+            if (Mana < MaxMana && auraCharge.IsCharging)
                 AddMana(ManaChargingSpeed * BattleScene.dt);
 
-                if (Mana >= MaxMana)
-                {
-                    Mana = MaxMana;
-                    ManaConservationInterval = 1.5f;
-                }
+            if (Mana >= MaxMana)
+            {
+                Mana = MaxMana;
+                auraCharge.IsAtMaxMana = true;
+                ManaConservationInterval = 1.5f;
             }
         }
 
@@ -198,18 +199,24 @@ namespace Cyvatar.src.Warriors
                 return;
             }
 
+            auraCharge.Stop();
+            forceField.Stop();
             State = PlayerState.Attack;
         }
 
         protected virtual void Block()
         {
+            auraCharge.Stop();
+
             if (Energy > 0)
             {
                 State = PlayerState.Block;
+                forceField.IsActive = true;
                 AddEnergy(-BlockEnergyConsumptionSpeed * BattleScene.dt);
                 return;
             }
 
+            forceField.Stop();
             State = PlayerState.Idle;
             EnergyDepletionCooldown += BattleScene.dt;
         }
@@ -221,6 +228,8 @@ namespace Cyvatar.src.Warriors
             MovementCurrentCooldown -= BattleScene.dt;
             EnergyDepletionCooldown -= BattleScene.dt;
             AttackEnergyChargingCooldownTime -= BattleScene.dt;
+            auraCharge.Update();
+            forceField.Update();
 
             if (State != PlayerState.Charge)
             {
@@ -247,54 +256,195 @@ namespace Cyvatar.src.Warriors
                 throw new Exception($"Player has  invalid State: {State.ToString()}");
 
             if (State == PlayerState.Charge)
-                chargingAnimation.Draw();
+                auraCharge.Draw();
+            else if (State == PlayerState.Block)
+                forceField.Draw();
         }
     }
 
-    public class ChargingAnimation
+    #region Mana Aura Charging
+
+    public class AuraCharge
     {
-        private List<Texture2D> _frames = new();
-        private float _currentFrame = 0f;
-        private const float _frameSpeed = 25f;
-        private bool _firstLoop = true;
-        private const int _frameCount = 47;
-        private readonly string _framesPath = Path.Combine("Battle", "Characters", "Charging");
+        public ChargingAnimation _animation;
+        private Sound _sparkSound;
+        private Sound _chargeSound;
+        private Sound _maxAuraSound;
+        public bool IsActive = false;
+        private bool IsStart = true;
+        private float _timeFromStart = 0;
+        public bool IsCharging { get => _timeFromStart >= 0.25 && !IsAtMaxMana; }
+        public bool IsAtMaxMana = false;
 
-        private Vector2 Coo { get; set; }
-        public int CurrentFrame { get => (int)_currentFrame; }
-
-        public ChargingAnimation(Vector2 playerPosition)
+        public AuraCharge(Vector2 playerPosition)
         {
-            UpdateCoordinates(playerPosition);
-            _frames = Enumerable.Range(0, _frameCount).Select(
-                i => GameSceneManager.LoadImage(Path.Combine(_framesPath, $"{i}.png"), scale: 1.6f)
-            ).ToList();
+            _animation = new ChargingAnimation(playerPosition);
+            _sparkSound = new Sound(Path.Combine("Player", "Aura", "AuraSpark.wav"));
+            _chargeSound = new Sound(Path.Combine("Player", "Aura", "AuraCharge.wav"), isLoop: true);
+            _maxAuraSound = new Sound(Path.Combine("Player", "Aura", "MaxAura.wav"), isLoop: true, volume:0.7f);
         }
 
+        public void UpdateCoordinates(Vector2 playerPosition)
+        {
+            _animation.UpdateCoordinates(playerPosition);
+        }
+
+        public void Stop()
+        {
+            IsActive = false;
+            IsStart = true;
+            _timeFromStart = 0;
+            IsAtMaxMana = false;
+            _maxAuraSound.Stop();
+            _sparkSound.Stop();
+            _chargeSound.Stop();
+            _animation?.Reset();
+        }
+
+        public void Update()
+        {
+            if (!IsActive) return;
+
+            _animation.Update();
+            _timeFromStart += BattleScene.dt;
+
+            // When the charging starts, and the Mana is not yet rising
+            if (IsStart)
+            {
+                IsStart = false;
+                _sparkSound.Play();
+            }
+
+            if (IsAtMaxMana)
+            {
+                _chargeSound.Stop();
+                _maxAuraSound.Play();
+            }
+            // Charging Mana
+            else if (IsCharging)
+            {
+                _chargeSound.Play();
+                _maxAuraSound.Stop();
+            }
+        }
+
+        public void Draw()
+        {
+            _animation.Draw();
+        }
+    }
+
+    public class ChargingAnimation: LoopAnimatioon
+    {
+        public ChargingAnimation(Vector2 playerPosition) : base
+        (
+            Path.Combine("Battle", "Characters", "Player","Charging"),
+            playerPosition,
+            47,
+            25,
+            1.6f
+        )
+        {
+            UpdateCoordinates(playerPosition);
+        }
+
+        /// <summary>
+        /// Adjusts the position of the animation according to the position of the player.
+        /// </summary>
+        /// <param name="playerPosition"></param>
         public void UpdateCoordinates(Vector2 playerPosition)
         {
             Coo = new Vector2(playerPosition.X - 205, playerPosition.Y - 195);
         }
 
+        public void Update() { base.Update(BattleScene.dt); }
+    }
+
+    #endregion Mana Aura Charging
+
+    #region Force Field Barrier
+
+    public class ForceFieldBarrier
+    {
+        public BarrierAnimation _animation;
+        private Sound _invokingSound;
+        private Sound _maxBarrierSound;
+        public bool IsActive = false;
+        private bool IsStart = true;
+        public bool BarrierIsComplete { get => _animation.HasEnded; }
+
+        public ForceFieldBarrier(Vector2 playerPosition)
+        {
+            _animation = new BarrierAnimation(playerPosition);
+            _invokingSound = new Sound(Path.Combine("Player", "ForceField", "Invoking.wav"), isLoop: false);
+            _maxBarrierSound = new Sound(Path.Combine("Player", "ForceField", "FullBarrier.wav"), isLoop: true, volume: 0.5f);
+        }
+
+        public void UpdateCoordinates(Vector2 playerPosition)
+        {
+            _animation.UpdateCoordinates(playerPosition);
+        }
+
+        public void Stop()
+        {
+            IsActive = false;
+            IsStart = true;
+            _maxBarrierSound.Stop();
+            _invokingSound.Stop();
+            _animation?.Reset();
+        }
+
+        public void Update()
+        {
+            if (!IsActive) return;
+            
+            _animation.Update();
+
+            // When the charging starts, and the Mana is not yet rising
+            if (IsStart)
+            {
+                IsStart = false;
+                _invokingSound.Play();
+            }
+
+            if (BarrierIsComplete)
+            {
+                _invokingSound.Stop();
+                _maxBarrierSound.Play();
+            }
+        }
+
         public void Draw()
         {
-            // Avoid displaying the empty frames (0 and 1) after the first loop
-            if (!_firstLoop && _currentFrame < 2f)
-                _currentFrame = 2f;
-            // After frame 2 we consider the animation past the first loop
-            else if (_currentFrame > 2f)
-                _firstLoop = false;
-
-            GraphicManager.Screen.Draw(_frames[(int)_currentFrame], Coo, Color.White);
-
-            // Advance animation withing the boundaries of the existing frames
-            _currentFrame = (_currentFrame + _frameSpeed*BattleScene.dt) % _frames.Count;
-        }
-
-        public void Reset()
-        {
-            _currentFrame = 0f;
-            _firstLoop = true;
+            _animation.Draw();
         }
     }
+
+    public class BarrierAnimation : SimpleAnimation
+    {
+        public BarrierAnimation(Vector2 playerPosition) : base
+        (
+            Path.Combine("Battle", "Characters", "Player", "ForceField"),
+            playerPosition,
+            5,
+            10,
+            0
+        )
+        {
+            UpdateCoordinates(playerPosition);
+        }
+
+        /// <summary>
+        /// Adjusts the position of the animation according to the position of the player.
+        /// </summary>
+        /// <param name="playerPosition">Current position of the player.</param>
+        public void UpdateCoordinates(Vector2 playerPosition)
+        {
+            Coo = new Vector2(playerPosition.X + 150, playerPosition.Y + 10);
+        }
+
+        public void Update() { base.Update(BattleScene.dt); }
+    }
+
+    #endregion Force Field Barrier
 }

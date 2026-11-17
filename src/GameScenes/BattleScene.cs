@@ -36,8 +36,6 @@ namespace Cyvatar.src.GameScenes
 
         public DualSenseController Controller { get; set; } = new DualSenseController();
 
-        public static float dt = 0;
-
         public BattleScene(GraphicsDevice graphicsDevice) : base(graphicsDevice, GameSceneLink.LBattleScene) { }
 
         public override void LoadContent()
