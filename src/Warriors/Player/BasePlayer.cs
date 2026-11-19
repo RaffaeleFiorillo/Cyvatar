@@ -352,7 +352,7 @@ namespace Cyvatar.src.Warriors
         /// Adjusts the position of the animation according to the position of the player.
         /// </summary>
         /// <param name="playerPosition"></param>
-        public void UpdateCoordinates(Vector2 playerPosition)
+        public override void UpdateCoordinates(Vector2 playerPosition)
         {
             Coo = new Vector2(playerPosition.X - 205, playerPosition.Y - 195);
         }
@@ -438,7 +438,7 @@ namespace Cyvatar.src.Warriors
         /// Adjusts the position of the animation according to the position of the player.
         /// </summary>
         /// <param name="playerPosition">Current position of the player.</param>
-        public void UpdateCoordinates(Vector2 playerPosition)
+        public override void UpdateCoordinates(Vector2 playerPosition)
         {
             Coo = new Vector2(playerPosition.X + 150, playerPosition.Y + 10);
         }

@@ -20,6 +20,10 @@ namespace Cyvatar.src.Utils.Animations
         public readonly int FrameCount;
         protected readonly string _framesPath;
 
+        /// <summary>
+        /// This must be internally set to true when the animation reaches an end (if not a loop).
+        /// </summary>
+        public bool HasEnded = false;
         protected Vector2 Coo { get; set; }
 
         public Animation(
@@ -46,6 +50,8 @@ namespace Cyvatar.src.Utils.Animations
             _currentFrame = 0f;
         }
 
+        public abstract void UpdateCoordinates(Vector2 coo);
+
         public abstract void Update(float dt);
 
         public void Draw()
@@ -67,6 +73,8 @@ namespace Cyvatar.src.Utils.Animations
                 float imageScale = 1
             ) : base(framesPath, initialPosition, framesCount, frameSpeed, imageScale)
         {}
+
+        public override void UpdateCoordinates(Vector2 coo) { }
 
         public override void Update(float dt)
         {
@@ -90,7 +98,6 @@ namespace Cyvatar.src.Utils.Animations
 
     public abstract class SimpleAnimation: Animation
     {
-        public bool HasEnded = true;
         protected float LastFrameWaitingTime = 0;
         protected float LastFrameTotalWaitingTime;
 

@@ -48,6 +48,7 @@ namespace Cyvatar.src.GameScenes
             _player = new BlasterPlayer();
 
             Enemies.Add(new SpearGoblin());
+            Enemies.Add(new ArcherGoblin());
         }
 
         public override void Update(GameTime gameTime)

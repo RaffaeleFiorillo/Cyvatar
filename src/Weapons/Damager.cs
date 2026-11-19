@@ -1,7 +1,10 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Cyvatar.src.GameScenes;
+using Cyvatar.src.Utils.Animations;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,6 +42,10 @@ namespace Cyvatar.src.Weapons
         /// </summary>
         public bool ToBeDeleted = false;
 
+        /// <summary>
+        /// Defines if the damager deals a continuous amount of damage instead of a one-hit damage.
+        /// </summary>
+        public bool DealsContinuousDamage = false;
 
         /// <summary>
         /// Amount of damage dealt by this Damager.
@@ -61,5 +68,34 @@ namespace Cyvatar.src.Weapons
         public abstract void Update();
 
         public abstract void Draw();
+    }
+
+    public abstract class SimpleProjectile : Damager
+    {
+        protected readonly float Speed;  // Speed of the spear in m/s
+        protected readonly string _baseImagePath = Path.Combine("Battle", "Weapons");
+
+        public SimpleProjectile(Vector2 initialCoo, float damage, float speed, OriginType origin) : base(origin, damage)
+        {
+            Coo = new Vector2(initialCoo.X, initialCoo.Y + 50);
+            Speed = speed;
+        }
+
+        protected abstract Texture2D GetImage();
+
+        public override void ApplyHitEffect()
+        {
+            ToBeDeleted = true;
+        }
+
+        public override void Update()
+        {
+            Coo.X -= Speed * BattleScene.dt;
+        }
+
+        public override void Draw()
+        {
+            GraphicManager.Screen.Draw(GetImage(), Coo, Color.White);
+        }
     }
 }

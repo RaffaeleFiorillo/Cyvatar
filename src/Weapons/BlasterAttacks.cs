@@ -133,14 +133,18 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
         private static int FrameSpeed = 25;  // Time between each frame of the Bolt animation (Frame/Second)
         public static int EnergyCost = 30;  // Energy consumed by shooting a Bolt (Jolts)
         public static float CooldownTime = 3f; // Time to wait before the next Bolt can be shot (Seconds)
-        private const float _damage = 10;
+        private const float _damage = 100;  // Damage dealt every second the enemy is in contact with this Damager.
 
         /// <summary>
         /// Sound played when this bullet is created.
         /// </summary>
         private static Sound sound = new Sound(Path.Combine("Weapons", "QuantumSound.wav"));
 
-        public QuantumBullet(Vector2 playerCoo, int blasterLevel) : base(playerCoo, blasterLevel, _damage) { sound.Play(); }
+        public QuantumBullet(Vector2 playerCoo, int blasterLevel) : base(playerCoo, blasterLevel, _damage)
+        {
+            DealsContinuousDamage = true;
+            sound.Play();
+        }
 
         public override void ApplyHitEffect()
         {

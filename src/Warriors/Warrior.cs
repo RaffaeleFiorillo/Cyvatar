@@ -29,7 +29,7 @@ namespace Cyvatar.src.Warriors
         /// <summary>
         /// Pixel coordinates that allow to display the warrior's image on the screen.
         /// </summary>
-        protected Vector2 Coo;
+        public Vector2 Coo;
         public Rectangle HitBox;
 
         protected Warrior(int x, int y, float hp)

@@ -4,6 +4,7 @@ using Cyvatar.src.Weapons;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Diagnostics;
@@ -14,66 +15,40 @@ using System.Threading.Tasks;
 
 namespace Cyvatar.src.Warriors
 {
-    public class SpearGoblin : Warrior
+    public class SpearGoblin : Goblin
     {
-        private ThrowAnimation _throwAnimation;
-        private DeathAnimation _deathAnimation;
+        private const float _imageScale = 2.2f;
 
-        private static Texture2D IdleImage;
-        private readonly string ImagesPath = Path.Combine("Battle", "Characters", "Enemies", "SpearGoblin");
-        private readonly Texture2D HpBarrBorder = GameSceneManager.LoadImage(Path.Combine("Battle", "Characters", "Enemies", "HpBarrBorder.png"));
-
-        private float XMovingProbability = 0.025f;
-        private float YMovingProbability = 0.035f;
-        private float MovingCooldownTime = 0;
-        private float MaxMovingCooldownTime = 1f;
-
-        private bool IsAttacking = false;
-        private bool HasThrown = false;
-        private float AttackingCooldownTime = 0;
-        private float MaxAttackingCooldownTime = 6f;
-        private float AttackingProbability = 0.015f;
-
-        private const float MaxHp = 100;
-        private Rectangle HpRectangle;
-        private Color HpColor;
-
-        public SpearGoblin() : base(Random.Shared.Next(5, 8), Random.Shared.Next(0, 3), MaxHp)
+        public SpearGoblin() : base(
+            GoblinType.SpearGoblin,
+            Random.Shared.Next(5, 8),
+            Random.Shared.Next(0, 3),
+            _imageScale, 
+            100
+        )
         {
-            float imageScale = 2.2f;
-            IdleImage = GameSceneManager.LoadImage(Path.Combine(ImagesPath, "Idle.png"), scale: imageScale);
-            _throwAnimation = new ThrowAnimation(Coo, imageScale);
-            _deathAnimation = new DeathAnimation(Coo, imageScale);
+            MoveSet = new SpearGoblinMoveSet(this, _imageScale);
+            DeathAnimation = new SpearGoblinDeathAnimation(Coo, _imageScale);
             UpdatePixelCoordinates();
             FieldRange = 3;
-            HitBox = new Rectangle((int)Coo.X+20, (int)Coo.Y + 30, 100, 120);
-            HpRectangle = new Rectangle((int)Coo.X + 2, (int)Coo.Y + 5, 100, 10);
-            HpColor = Color.Green;
+            HitBox = new Rectangle((int)Coo.X + 20, (int)Coo.Y + 30, 100, 120);
+
+            MaxHp = 100;
+            XMovingProbability = 0.025f;
+            YMovingProbability = 0.055f;
+
+            MaxMovingCooldownTime = 1f;
+            AttackingProbability = 0.015f;
         }
 
         public override void UpdatePixelCoordinates()
         {
             Coo = new Vector2(X*197, Y*-145 + 820);
-            _throwAnimation?.UpdateCoordinates(Coo);
-            _deathAnimation?.UpdateCoordinates(Coo);
+            MoveSet?.UpdateCoordinates(Coo);
+            DeathAnimation?.UpdateCoordinates(Coo);
         }
 
-        public override void TakeDamageFrom(Damager damager)
-        {
-            Hp -= damager.Damage;
-            Debug.WriteLine($"Hit! Remaining {Hp}");
-
-            float hpPercentage = Hp / MaxHp;
-            if (hpPercentage >= 75)
-                HpColor = Color.Green;
-            else if (hpPercentage >= 35)
-                HpColor = Color.Orange;
-            else
-                HpColor = Color.Red;
-            HpRectangle.Width = (int)(hpPercentage*MaxHp);
-        }
-
-        private void Move()
+        protected override void Move()
         {
             if (MovingCooldownTime <= 0)
             {
@@ -85,10 +60,7 @@ namespace Cyvatar.src.Warriors
                         Y -= Y > 0 ? 1 : 0;
                     MovingCooldownTime = MaxMovingCooldownTime;
 
-                    HitBox.X = (int)Coo.X + 20;
                     HitBox.Y = (int)Coo.Y + 30;
-
-                    HpRectangle.X = (int)Coo.X + 2;
                     HpRectangle.Y = (int)Coo.Y + 5;
                 }
                 else if (Random.Shared.NextDouble() < XMovingProbability)
@@ -100,91 +72,15 @@ namespace Cyvatar.src.Warriors
                     MovingCooldownTime = MaxMovingCooldownTime;
 
                     HitBox.X = (int)Coo.X + 20;
-                    HitBox.Y = (int)Coo.Y + 30;
-
                     HpRectangle.X = (int)Coo.X + 2;
-                    HpRectangle.Y = (int)Coo.Y + 5;
                 }
             }
         }
-
-        public override void Update()
-        {
-            MovingCooldownTime -= BattleScene.dt;
-
-            if (Hp <= 0)
-                _deathAnimation.Update(BattleScene.dt);
-            else if (IsAttacking)
-            {
-                _throwAnimation.Update(BattleScene.dt);
-
-                if (_throwAnimation.HasEnded)
-                {
-                    _throwAnimation.Reset();
-                    IsAttacking = false;
-                    HasThrown = false;
-                    AttackingCooldownTime = MaxAttackingCooldownTime;
-                }
-
-                // On the last frame, if the spear hasn't been thrown yet, it throws it
-                if (_throwAnimation.CurrentFrame == _throwAnimation.FrameCount-1 && !HasThrown)
-                {
-                    BattleScene.Damagers.Add(new GoblinSpear(Coo));
-                    HasThrown = true;
-                }      
-            }
-            else
-            {
-                // When not attacking, the Goblin can move at random
-                Move();
-
-                // When not attacking, the attacking cooldown progresses
-                AttackingCooldownTime -= BattleScene.dt;
-                IsAttacking = (AttackingCooldownTime <= 0 && Random.Shared.NextDouble() <= AttackingProbability);
-            }
-        }
-
-        public override void Draw()
-        {
-            GraphicManager.DrawRectangle(HpRectangle, HpColor);
-            GraphicManager.Screen.Draw(HpBarrBorder, Coo, Color.White);
-
-            if (Hp <= 0)
-            {
-                _deathAnimation.Draw();
-                if (_deathAnimation.HasEnded)
-                    IsDead = true;
-            }
-            else if (IsAttacking)
-                _throwAnimation.Draw();
-            else
-                GraphicManager.Screen.Draw(IdleImage, Coo, Color.White);
-        }
     }
 
-    public class ThrowAnimation: SimpleAnimation
+    public class SpearGoblinDeathAnimation: SimpleAnimation
     {
-        public ThrowAnimation(Vector2 goblinPosition, float imageScale): base
-            (
-                Path.Combine("Battle", "Characters", "Enemies", "SpearGoblin", "Throw"), // Path to the frames
-                goblinPosition,  // InitialPosition
-                6,               // FramesCount
-                6f,              // Frame Speed (F/s)
-                1.5f,            // Last Frame Time before animation Ends (s)
-                imageScale       // scale for the frame images in the animation
-            )
-        {
-        }
-
-        public void UpdateCoordinates(Vector2 goblinPosition)
-        {
-            Coo = goblinPosition;
-        }
-    }
-
-    public class DeathAnimation: SimpleAnimation
-    {
-        public DeathAnimation(Vector2 goblinPosition, float imageScale) : base
+        public SpearGoblinDeathAnimation(Vector2 goblinPosition, float imageScale) : base
             (
                 Path.Combine("Battle", "Characters", "Enemies", "SpearGoblin", "Death"), // Path to the frames
                 goblinPosition,  // InitialPosition
@@ -196,9 +92,79 @@ namespace Cyvatar.src.Warriors
         {
         }
 
-        public void UpdateCoordinates(Vector2 goblinPosition)
+        public override void UpdateCoordinates(Vector2 goblinPosition)
         {
             Coo = goblinPosition;
         }
     }
+
+
+    #region Attack MoveSet
+
+    public class SpearGoblinMoveSet : AttackMoveSet
+    {
+        public SpearGoblinMoveSet(Enemy moveSetOwner, float imageScale):base(moveSetOwner)
+        {
+            MoveSet.Add(new SpearThrowAttack(moveSetOwner.Coo, imageScale));
+        }
+
+        public override void UpdateCoordinates(Vector2 coo)
+        {
+            ActiveAttack.AttackAnimation.UpdateCoordinates(coo);
+        }
+    }
+
+    public class SpearThrowAttack : Attack
+    {
+        private bool HasAttacked = false;
+
+        public SpearThrowAttack(Vector2 goblinCoo, float imageScale) : base(
+            new ThrowAnimation(goblinCoo, imageScale),
+            typeof(GoblinSpear),
+            2  // Cooldown time in seconds
+        )
+        { }
+
+        public override void PerformAttack(Enemy enemy)
+        {
+            if (AttackAnimation.HasEnded)
+            {
+                AttackAnimation.Reset();
+                enemy.State = EnemyState.Idle;
+                HasAttacked = false;
+                // make the enemy wait a certain amount of time before attacking again
+                enemy.AttackingCooldownTime = CooldownTime;
+            }
+
+            // On the last frame, if the spear hasn't been thrown yet, it throws it
+            if (AttackAnimation.CurrentFrame == AttackAnimation.FrameCount - 1 && !HasAttacked)
+            {
+                // Adds the Spear to the list of damagers in the Battle Field
+                BattleScene.Damagers.Add((Damager)Activator.CreateInstance(DamagerType, enemy.Coo));
+                HasAttacked = true;  // inform that the spear has been thrown
+            }
+        }
+    }
+
+    public class ThrowAnimation : SimpleAnimation
+    {
+        public ThrowAnimation(Vector2 goblinPosition, float imageScale) : base
+            (
+                Path.Combine("Battle", "Characters", "Enemies", "SpearGoblin", "Throw"), // Path to the frames
+                goblinPosition,  // InitialPosition
+                6,               // FramesCount
+                6f,              // Frame Speed (F/s)
+                1.5f,            // Last Frame Time before animation Ends (s)
+                imageScale       // scale for the frame images in the animation
+            )
+        {
+        }
+
+        public override void UpdateCoordinates(Vector2 goblinPosition)
+        {
+            Coo = goblinPosition;
+        }
+    }
+
+    #endregion Attack MoveSet
 }
