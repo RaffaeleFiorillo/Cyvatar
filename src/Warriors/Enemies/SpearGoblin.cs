@@ -107,11 +107,6 @@ namespace Cyvatar.src.Warriors
         {
             MoveSet.Add(new SpearThrowAttack(moveSetOwner.Coo, imageScale));
         }
-
-        public override void UpdateCoordinates(Vector2 coo)
-        {
-            ActiveAttack.AttackAnimation.UpdateCoordinates(coo);
-        }
     }
 
     public class SpearThrowAttack : Attack
@@ -125,15 +120,17 @@ namespace Cyvatar.src.Warriors
         )
         { }
 
-        public override void PerformAttack(Enemy enemy)
+        public override void Reset()
+        {
+            base.Reset();
+            HasAttacked = false;
+        }
+
+        public override void Update(Enemy enemy)
         {
             if (AttackAnimation.HasEnded)
             {
-                AttackAnimation.Reset();
-                enemy.State = EnemyState.Idle;
-                HasAttacked = false;
-                // make the enemy wait a certain amount of time before attacking again
-                enemy.AttackingCooldownTime = CooldownTime;
+                HasEnded = true;
             }
 
             // On the last frame, if the spear hasn't been thrown yet, it throws it

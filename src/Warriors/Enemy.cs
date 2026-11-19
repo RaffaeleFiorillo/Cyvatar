@@ -5,6 +5,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace Cyvatar.src.Warriors
@@ -65,6 +67,10 @@ namespace Cyvatar.src.Warriors
 
         protected Enemy(int x, int y, float hp) : base(x, y, hp){}
 
+        /// <summary>
+        /// Moving logic of the enemy
+        /// </summary>
+        /// <returns>true if the player has moved; false: if the player stayed in the same position</returns>
         protected abstract void Move();
 
         public override void TakeDamageFrom(Damager damager)
@@ -82,7 +88,7 @@ namespace Cyvatar.src.Warriors
 
             State = Hp <= 0 ? EnemyState.Dead : EnemyState.Idle;
 
-            MoveSet.Reset();
+            MoveSet.EndAttackState();
             HpRectangle.Width = (int)(hpPercentage * MaxHp);
         }
 
@@ -106,7 +112,9 @@ namespace Cyvatar.src.Warriors
                     // When not attacking, the attacking cooldown progresses
                     AttackingCooldownTime -= BattleScene.dt;
                     if (AttackingCooldownTime <= 0 && Random.Shared.NextDouble() <= AttackingProbability)
+                    {
                         State = EnemyState.Attacking;
+                    }
                     break;
             }
         }
@@ -119,6 +127,7 @@ namespace Cyvatar.src.Warriors
             switch (State)
             {
                 case EnemyState.Dead:
+                    Debug.WriteLine("Is Dead");
                     DeathAnimation.Draw();
                     if (DeathAnimation.HasEnded)
                         IsDead = true;
@@ -145,18 +154,29 @@ namespace Cyvatar.src.Warriors
         protected int _activeAttackIndex = 0;
         protected bool HasChosenAttack = false;
 
+        /// <summary>
+        /// The Childs of this class MUST add all their attacks in the MoveSet list, inside of their own constructor.
+        /// </summary>
+        /// <param name="moveSetOwner">The enemy that uses this Move Set.</param>
         public AttackMoveSet(Enemy moveSetOwner)
         {
             MoveSetOwner = moveSetOwner;
         }
 
-        public virtual void Reset()
+        public virtual void EndAttackState()
         {
-            ActiveAttack.AttackAnimation.Reset();
-            HasChosenAttack = false;
+            // When the attack reaches an end, the Enemy goes back to the Idle state
+            MoveSetOwner.State = MoveSetOwner.State == EnemyState.Attacking ? EnemyState.Idle : MoveSetOwner.State;
+            // make the enemy wait a certain amount of time before attacking again
+            MoveSetOwner.AttackingCooldownTime = ActiveAttack.CooldownTime;
+            HasChosenAttack = false;  // Next time the Enemy enters Attacking state, it chooses again between the available attacks.
+            ActiveAttack.Reset();
         }
 
-        public virtual void UpdateCoordinates(Vector2 coo) { }
+        public void UpdateCoordinates(Vector2 coo) 
+        {
+            foreach (var attack in MoveSet) attack.AttackAnimation.UpdateCoordinates(coo);
+        }
 
         public void Update()
         {
@@ -165,10 +185,13 @@ namespace Cyvatar.src.Warriors
             {
                 _activeAttackIndex = Random.Shared.Next(MoveSet.Count);
                 HasChosenAttack = true;
+                // Debug.WriteLine($"Has chosen attack {_activeAttackIndex}");
             }
-            ActiveAttack.PerformAttack(MoveSetOwner);
 
+            ActiveAttack.Update(MoveSetOwner);
             ActiveAttack.AttackAnimation.Update(BattleScene.dt);
+
+            if (ActiveAttack.HasEnded) EndAttackState();
         }
 
         public void Draw()
@@ -195,7 +218,9 @@ namespace Cyvatar.src.Warriors
         /// <summary>
         /// Time the enemy has to wait after using this attack.
         /// </summary>
-        protected float CooldownTime;
+        public float CooldownTime;
+
+        public bool HasEnded = false;
 
         public Attack(Animation attackAnimation, Type damagerType, float cooldownTime)
         {
@@ -204,11 +229,17 @@ namespace Cyvatar.src.Warriors
             CooldownTime = cooldownTime;
         }
 
+        public virtual void Reset()
+        {
+            HasEnded = false;
+            AttackAnimation.Reset();
+        }
+
         /// <summary>
         /// This method should be called, by the AttackMoveset class that holds it.
         /// The call should be made every time the enemy is in the Attacking state until the attack has reached an end.
         /// </summary>
         /// <param name="enemy">The Enemy Warrior performing the attack.</param>
-        public abstract void PerformAttack(Enemy enemy);
+        public abstract void Update(Enemy enemy);
     }
 }

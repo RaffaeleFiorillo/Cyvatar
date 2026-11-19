@@ -99,11 +99,7 @@ namespace Cyvatar.src.Warriors
         public ArcherGoblinMoveSet(Enemy moveSetOwner, float imageScale) : base(moveSetOwner)
         {
             MoveSet.Add(new ArrowAttack(moveSetOwner.Coo, imageScale));
-        }
-
-        public override void UpdateCoordinates(Vector2 coo)
-        {
-            ActiveAttack.AttackAnimation.UpdateCoordinates(coo);
+            MoveSet.Add(new MultiArrowAttack(moveSetOwner.Coo, imageScale));
         }
     }
 
@@ -118,15 +114,18 @@ namespace Cyvatar.src.Warriors
         )
         { }
 
-        public override void PerformAttack(Enemy enemy)
+        public override void Reset()  
+        {
+            base.Reset();
+            HasAttacked = false;
+            
+        }
+
+        public override void Update(Enemy enemy)
         {
             if (AttackAnimation.HasEnded)
             {
-                AttackAnimation.Reset();
-                enemy.State = EnemyState.Idle;
-                HasAttacked = false;
-                // make the enemy wait a certain amount of time before attacking again
-                enemy.AttackingCooldownTime = CooldownTime;
+                HasEnded = true;
             }
 
             // On the last frame, if the spear hasn't been thrown yet, it throws it
@@ -139,15 +138,76 @@ namespace Cyvatar.src.Warriors
         }
     }
 
+    public class MultiArrowAttack : Attack
+    {
+        private bool HasAttacked = false;
+
+        /// <summary>
+        /// The number of arrows to shoot has been decided.
+        /// </summary>
+        private bool HasChosenAttackNumber = false;
+
+        /// <summary>
+        /// Number of arrows that are shot one after the other.
+        /// </summary>
+        private int attackNumber = 0;
+
+        public MultiArrowAttack(Vector2 goblinCoo, float imageScale) : base(
+            new ShootAnimation(goblinCoo, imageScale, framespeed:12,lastFrameTime:0),
+            typeof(GoblinArrow),
+            2f  // Cooldown time in seconds
+        )
+        { }
+
+        public override void Reset()
+        {
+            base.Reset();
+            HasChosenAttackNumber = false;
+            HasAttacked = false;
+        }
+
+        public override void Update(Enemy enemy)
+        {
+            if (!HasChosenAttackNumber)
+            {
+                attackNumber = Random.Shared.Next(1, 3);
+                HasChosenAttackNumber = true;
+            }
+
+            if (AttackAnimation.HasEnded)
+            {
+                AttackAnimation.Reset();
+
+                // if all arrows have been shot, the Attack reaches an end
+                if (attackNumber == 0)
+                {
+                    HasEnded = true; // Inform that the Attack has ended
+                    return;
+                }
+
+                attackNumber -= 1;
+                HasAttacked = false;
+            }
+
+            // On the last frame, if the arrow hasn't been thrown yet, it throws it
+            if (AttackAnimation.CurrentFrame == AttackAnimation.FrameCount - 1 && !HasAttacked)
+            {
+                // Adds the Spear to the list of damagers in the Battle Field
+                BattleScene.Damagers.Add((Damager)Activator.CreateInstance(DamagerType, enemy.Coo));
+                HasAttacked = true;  // inform that the arrow has been shot
+            }
+        }
+    }
+
     public class ShootAnimation : SimpleAnimation
     {
-        public ShootAnimation(Vector2 goblinPosition, float imageScale) : base
+        public ShootAnimation(Vector2 goblinPosition, float imageScale, float framespeed = 6f, float lastFrameTime = 1.5f) : base
             (
                 Path.Combine("Battle", "Characters", "Enemies", "ArcherGoblin", "Shoot"), // Path to the frames
                 goblinPosition,  // InitialPosition
                 4,               // FramesCount
                 6f,              // Frame Speed (F/s)
-                1.5f,            // Last Frame Time before animation Ends (s)
+                lastFrameTime,            // Last Frame Time before animation Ends (s)
                 imageScale       // scale for the frame images in the animation
             )
         {
