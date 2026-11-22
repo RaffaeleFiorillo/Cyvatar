@@ -78,10 +78,10 @@ namespace Cyvatar.src.Warriors
     {
         public ArrowGoblinDeathAnimation(Vector2 goblinPosition, float imageScale) : base
             (
-                Path.Combine("Battle", "Characters", "Enemies", "SpearGoblin", "Death"), // Path to the frames
+                Path.Combine("Battle", "Characters", "Enemies", "ArcherGoblin", "Death"), // Path to the frames
                 goblinPosition,  // InitialPosition
-                8,               // FramesCount
-                6f,              // Frame Speed (F/s)
+                10,               // FramesCount
+                12f,              // Frame Speed (F/s)
                 0.4f,            // Last Frame Time before animation Ends (s)
                 imageScale       // scale for the frame images in the animation
             )
@@ -117,8 +117,7 @@ namespace Cyvatar.src.Warriors
         public override void Reset()  
         {
             base.Reset();
-            HasAttacked = false;
-            
+            HasAttacked = false;     
         }
 
         public override void Update(Enemy enemy)
@@ -146,6 +145,7 @@ namespace Cyvatar.src.Warriors
         /// The number of arrows to shoot has been decided.
         /// </summary>
         private bool HasChosenAttackNumber = false;
+        private float FinalPoseTime = 0; // Amount of time (seconds) spent on the final pose;
 
         /// <summary>
         /// Number of arrows that are shot one after the other.
@@ -164,6 +164,7 @@ namespace Cyvatar.src.Warriors
             base.Reset();
             HasChosenAttackNumber = false;
             HasAttacked = false;
+            FinalPoseTime = 1;  // every final pose after a multi-shot lasts 1 second;
         }
 
         public override void Update(Enemy enemy)
@@ -176,15 +177,15 @@ namespace Cyvatar.src.Warriors
 
             if (AttackAnimation.HasEnded)
             {
-                AttackAnimation.Reset();
-
                 // if all arrows have been shot, the Attack reaches an end
                 if (attackNumber == 0)
                 {
-                    HasEnded = true; // Inform that the Attack has ended
+                    HasEnded = FinalPoseTime <= 0; // Inform that the Attack has ended
+                    FinalPoseTime -= BattleScene.dt;
                     return;
                 }
 
+                AttackAnimation.Reset();
                 attackNumber -= 1;
                 HasAttacked = false;
             }
@@ -205,9 +206,9 @@ namespace Cyvatar.src.Warriors
             (
                 Path.Combine("Battle", "Characters", "Enemies", "ArcherGoblin", "Shoot"), // Path to the frames
                 goblinPosition,  // InitialPosition
-                4,               // FramesCount
+                5,               // FramesCount
                 6f,              // Frame Speed (F/s)
-                lastFrameTime,            // Last Frame Time before animation Ends (s)
+                lastFrameTime,   // Last Frame Time before animation Ends (s)
                 imageScale       // scale for the frame images in the animation
             )
         {

@@ -14,7 +14,7 @@ namespace Cyvatar.src.Warriors
         {
             {PlayerState.Idle, GameSceneManager.LoadImage(Path.Combine("Battle","Characters","Player","Idle.png")) },
             {PlayerState.Charge, GameSceneManager.LoadImage(Path.Combine("Battle","Characters","Player","Charging.png")) },
-            {PlayerState.Block, GameSceneManager.LoadImage(Path.Combine("Battle","Characters","Player","Block.png")) },
+            // {PlayerState.Block, GameSceneManager.LoadImage(Path.Combine("Battle","Characters","Player","Block.png")) },
             {PlayerState.Attack, GameSceneManager.LoadImage(Path.Combine("Battle","Characters","Player","Magic.png")) },
         };
         protected PlayerState State = PlayerState.Idle;
@@ -211,8 +211,9 @@ namespace Cyvatar.src.Warriors
             if (Energy > 0)
             {
                 State = PlayerState.Block;
+                if (forceField.BarrierIsComplete)
+                    AddEnergy(-BlockEnergyConsumptionSpeed * BattleScene.dt);
                 forceField.IsActive = true;
-                AddEnergy(-BlockEnergyConsumptionSpeed * BattleScene.dt);
                 return;
             }
 
@@ -252,8 +253,6 @@ namespace Cyvatar.src.Warriors
         {
             if (Images.ContainsKey(State))
                 GraphicManager.Screen.Draw(Images[State], Coo, Color.White);
-            else
-                throw new Exception($"Player has  invalid State: {State.ToString()}");
 
             if (State == PlayerState.Charge)
                 auraCharge.Draw();
@@ -366,23 +365,26 @@ namespace Cyvatar.src.Warriors
 
     public class ForceFieldBarrier
     {
-        public BarrierAnimation _animation;
+        public BarrierAnimation _barrierAnimation;
+        public BlockingAnimation _blockingAnimation;
         private Sound _invokingSound;
         private Sound _maxBarrierSound;
         public bool IsActive = false;
         private bool IsStart = true;
-        public bool BarrierIsComplete { get => _animation.HasEnded; }
+        public bool BarrierIsComplete { get => _barrierAnimation.HasEnded; }
 
         public ForceFieldBarrier(Vector2 playerPosition)
         {
-            _animation = new BarrierAnimation(playerPosition);
-            _invokingSound = new Sound(Path.Combine("Player", "ForceField", "Invoking.wav"), isLoop: false);
-            _maxBarrierSound = new Sound(Path.Combine("Player", "ForceField", "FullBarrier.wav"), isLoop: true, volume: 0.5f);
+            _barrierAnimation = new BarrierAnimation(playerPosition);
+            _blockingAnimation = new BlockingAnimation(playerPosition);
+            _invokingSound = new Sound(Path.Combine("Player", "ForceField", "Invoking.wav"), isLoop: false, volume:0.8f);
+            _maxBarrierSound = new Sound(Path.Combine("Player", "ForceField", "FullBarrier.wav"), isLoop: true, volume: 0.15f);
         }
 
         public void UpdateCoordinates(Vector2 playerPosition)
         {
-            _animation.UpdateCoordinates(playerPosition);
+            _barrierAnimation.UpdateCoordinates(playerPosition);
+            _blockingAnimation.UpdateCoordinates(playerPosition);
         }
 
         public void Stop()
@@ -391,14 +393,16 @@ namespace Cyvatar.src.Warriors
             IsStart = true;
             _maxBarrierSound.Stop();
             _invokingSound.Stop();
-            _animation?.Reset();
+            _barrierAnimation?.Reset();
+            _blockingAnimation?.Reset();
         }
 
         public void Update()
         {
             if (!IsActive) return;
-            
-            _animation.Update();
+
+            _blockingAnimation.Update();
+            _barrierAnimation.Update();
 
             // When the charging starts, and the Mana is not yet rising
             if (IsStart)
@@ -416,7 +420,8 @@ namespace Cyvatar.src.Warriors
 
         public void Draw()
         {
-            _animation.Draw();
+            _blockingAnimation.Draw();
+            _barrierAnimation.Draw();  
         }
     }
 
@@ -440,7 +445,34 @@ namespace Cyvatar.src.Warriors
         /// <param name="playerPosition">Current position of the player.</param>
         public override void UpdateCoordinates(Vector2 playerPosition)
         {
-            Coo = new Vector2(playerPosition.X + 150, playerPosition.Y + 10);
+            Coo = new Vector2(playerPosition.X + 130, playerPosition.Y);
+        }
+
+        public void Update() { base.Update(BattleScene.dt); }
+    }
+
+    public class BlockingAnimation : SimpleAnimation
+    {
+        public BlockingAnimation(Vector2 playerPosition) : base
+        (
+            Path.Combine("Battle", "Characters", "Player", "Blocking"),
+            playerPosition,
+            5,
+            10,
+            0,
+            0.28f
+        )
+        {
+            UpdateCoordinates(playerPosition);
+        }
+
+        /// <summary>
+        /// Adjusts the position of the animation according to the position of the player.
+        /// </summary>
+        /// <param name="playerPosition">Current position of the player.</param>
+        public override void UpdateCoordinates(Vector2 playerPosition)
+        {
+            Coo = new Vector2(playerPosition.X-10, playerPosition.Y -20);
         }
 
         public void Update() { base.Update(BattleScene.dt); }
