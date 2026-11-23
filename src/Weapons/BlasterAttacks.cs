@@ -58,11 +58,6 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
 
         public BoltBullet(Vector2 playerCoo, int blasterLevel) : base(playerCoo, blasterLevel, _damage) { sound.Play(); }
 
-        public override void ApplyHitEffect()
-        {
-            ToBeDeleted = true;
-        }
-
         public override Texture2D GetFrame()
         {
             return Frames[(int)CurrentFrame];
@@ -97,11 +92,6 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
         {
             sound.Stop();
             sound.Play(); 
-        }
-
-        public override void ApplyHitEffect()
-        {
-            ToBeDeleted = true;
         }
 
         public override Rectangle GetHitbox()

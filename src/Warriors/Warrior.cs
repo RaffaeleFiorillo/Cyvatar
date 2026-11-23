@@ -8,13 +8,13 @@ namespace Cyvatar.src.Warriors
     public abstract class Warrior
     {
         /// <summary>
-        /// The player can only move on tiles with x < PLAYER_FIELD_RANGE
+        /// The player can only move on tiles with x < PLAYER_FIELD_RANGE.
         /// </summary>
         public int FieldRange = 3;
 
         /// <summary>
         /// Flag that indicates if the player should be removed from the BattleScene.
-        /// It occurs when: Hp <= 0 AND DeathAnimation.HasEnded == true
+        /// It occurs when: Hp <= 0 AND DeathAnimation.HasEnded == true.
         /// </summary>
         public bool IsDead = false;
 

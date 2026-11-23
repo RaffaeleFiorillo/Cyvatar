@@ -37,10 +37,15 @@ namespace Cyvatar.src.Weapons
         public OriginType Type;
 
         /// <summary>
+        /// When Integrity reaches 0, it means the Damager has been destroyed.
+        /// </summary>
+        protected float Integrity=1; 
+
+        /// <summary>
         /// If this Flag is set to true, the Damager should be eliminated from the BattleScene.Damagers list.
         /// In other words when ToBeDeleted = True it ceases to exist.
         /// </summary>
-        public bool ToBeDeleted = false;
+        public bool ToBeDeleted { get => Coo.X > GameSceneManager.ScreenWidth || Integrity <= 0; }
 
         /// <summary>
         /// Defines if the damager deals a continuous amount of damage instead of a one-hit damage.
@@ -61,9 +66,11 @@ namespace Cyvatar.src.Weapons
 
         /// <summary>
         /// Defines the behaviour of the Damager when it hits something.
+        /// As the Base Behaviour, The Damager's Integrity decreases of 1 unit.
+        /// Since the default Integrity is 1, the Damager is usually Deleted after 1 Hit.
         /// Ex: Animations, Sound Effects, ToBeDeleted, ...
         /// </summary>
-        public abstract void ApplyHitEffect();
+        public virtual void ApplyHitEffect() { Integrity -= 1; }
 
         public abstract void Update();
 
@@ -82,11 +89,6 @@ namespace Cyvatar.src.Weapons
         }
 
         protected abstract Texture2D GetImage();
-
-        public override void ApplyHitEffect()
-        {
-            ToBeDeleted = true;
-        }
 
         public override void Update()
         {

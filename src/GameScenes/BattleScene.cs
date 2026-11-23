@@ -25,7 +25,7 @@ namespace Cyvatar.src.GameScenes
         // private BlasterPlayer _player;
         private BasePlayer _player;
 
-        public static List<Warrior> Enemies = new List<Warrior>();
+        public static List<Enemy> Enemies = new List<Enemy>();
         public static List<Damager> Damagers = new List<Damager>();
 
         // Transition control
@@ -48,6 +48,7 @@ namespace Cyvatar.src.GameScenes
             _player = new BlasterPlayer();
 
             Enemies.Add(new SpearGoblin());
+            Enemies.Add(new ArcherGoblin());
             Enemies.Add(new ArcherGoblin());
         }
 
@@ -73,19 +74,13 @@ namespace Cyvatar.src.GameScenes
 
             for (int i = 0; i < Enemies.Count; i++) { Enemies[i].Update(); }
 
-            // Go through all Damagers on the Player's side
-            foreach (var damager in Damagers.Where(d => d.Type == OriginType.FriendlyFire))
+            // Go through all Damagers on the Player's side (The ones that damage the Enemies)
+            foreach (var damager in Damagers.Where(d => d.Type == OriginType.FriendlyFire && !d.ToBeDeleted))
             {
-                // Updating the damager
-                if (damager.Coo.X > GameSceneManager.ScreenWidth)
-                {
-                    damager.ToBeDeleted = true;
-                    continue;
-                }
                 damager.Update();
 
                 // Collision Logic for Enemy-Damager
-                foreach (var enemy in Enemies)
+                foreach (var enemy in Enemies.Where(e => !e.IsDead ))
                 {
                     if (enemy.CollidesWith(damager.GetHitbox()))
                     {
@@ -95,15 +90,10 @@ namespace Cyvatar.src.GameScenes
                 }
             }
 
-            // Go through all Damagers on the Enemies' side
-            foreach (var damager in Damagers.Where(d => d.Type == OriginType.EnemyFire))
+            // Go through all Damagers on the Enemies' side (The ones that damage the Player)
+            foreach (var damager in Damagers.Where(d => d.Type == OriginType.EnemyFire && !d.ToBeDeleted))
             {
                 // Updating the damager
-                if (damager.Coo.X > GameSceneManager.ScreenWidth)
-                {
-                    damager.ToBeDeleted = true;
-                    continue;
-                }
                 damager.Update();
 
                 // Collision Logic for Enemy-Damager
@@ -114,7 +104,7 @@ namespace Cyvatar.src.GameScenes
                 }
             }
 
-            // Remove all "dead" damagers
+            // Remove all "dead" damagers and Enemies
             Damagers = Damagers.Where(d => !d.ToBeDeleted).ToList();
             Enemies = Enemies.Where(e => !e.IsDead).ToList();
         }

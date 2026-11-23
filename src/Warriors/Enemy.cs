@@ -61,6 +61,11 @@ namespace Cyvatar.src.Warriors
 
         protected float MovingCooldownTime;
 
+        /// <summary>
+        /// Flag that indicates if the Enemy should be Removed from the Battle Field.
+        /// </summary>
+        new public bool IsDead { get => State == EnemyState.Dead && DeathAnimation.HasEnded; }
+
         protected SimpleAnimation DeathAnimation;
 
         #endregion Properties
@@ -129,8 +134,6 @@ namespace Cyvatar.src.Warriors
                 case EnemyState.Dead:
                     Debug.WriteLine("Is Dead");
                     DeathAnimation.Draw();
-                    if (DeathAnimation.HasEnded)
-                        IsDead = true;
                     break;
 
                 case EnemyState.Attacking:
