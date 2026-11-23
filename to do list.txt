@@ -1,8 +1,10 @@
 This table shows stuff to be done in the future (to expand the game or to fix bugs), their level of difficulty and time-level to get it done.
 
 -------------------------------------------------------------------------------------------------------------------------
- ID  | Activity                                                                          |  State  |  Difficulty  | Time|
+  ID | Activity                                                                          |  State  |  Difficulty  | Time|
 -------------------------------------------------------------------------------------------------------------------------
+  0  | Complete Cyvatar 1.0 and Publish it.                                              | Pendent |     UnK      | UnK |
+------------------------------------------------------------------------------------------------------------------------|
   1  | Add animation for Player invoking Force Field Barrier                             |  Done   |      3       |  5  |
 -------------------------------------------------------------------------------------------------------------------------
   2  | Add a multi-arrow attack for the Archer Goblin                                    |  Done   |      4       |  4  |
@@ -13,5 +15,11 @@ This table shows stuff to be done in the future (to expand the game or to fix bu
 -------------------------------------------------------------------------------------------------------------------------
   5  | Create a Death Animation for the Player                                           | Pendent |      4       |  4  |
 -------------------------------------------------------------------------------------------------------------------------
-  6  | Display Player Health in numbers                                                  | Pendent |      2       |  2  |
+  6  | Display Player Health in numbers                                                  |  Done   |      2       |  2  |
+-------------------------------------------------------------------------------------------------------------------------
+  7  | Every action has an animation (See AttackMoveSet for abstraction)                 | Pendent |      4       |  6  |
+-------------------------------------------------------------------------------------------------------------------------
+  8  | Show how many actions are possible for a certain amount of Available action       | Pendent |      3       |  5  |
+-------------------------------------------------------------------------------------------------------------------------
+  9  | Improve key bindings following the logic of a better Control system.              | Pendent |      6       |  7  |
 -------------------------------------------------------------------------------------------------------------------------

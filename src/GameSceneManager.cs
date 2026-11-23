@@ -58,6 +58,8 @@ namespace Cyvatar.src
             Content.RootDirectory = "Content";
             IsMouseVisible = false;
 
+            GraphicManager.Content = Content;
+
             // Window setup (size, title, fps...) goes here
             Window.Title = "Cyvatar - Beta";
             _graphics.PreferredBackBufferWidth = ScreenWidth;

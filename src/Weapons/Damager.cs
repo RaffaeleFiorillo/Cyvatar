@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -98,6 +99,54 @@ namespace Cyvatar.src.Weapons
         public override void Draw()
         {
             GraphicManager.Screen.Draw(GetImage(), Coo, Color.White);
+        }
+    }
+
+    public class HitValue
+    {
+        #region Properties
+
+        private static readonly SpriteFont Font = GraphicManager.LoadFont("HitFont");
+
+        private readonly Rectangle _rectangle;
+
+        public Color Color { get => _color*Solidity; set { _color = value; } }
+        private Color _color = Color.Yellow;
+
+        /// <summary>
+        /// Hit's Numeric Damage Value displayed on the screen.
+        /// </summary>
+        private float Value;
+
+        /// <summary>
+        /// Current level of solidity the text has (1: fully visible; 0: transparent;)
+        /// </summary>
+        public float Solidity = 1;
+
+        /// <summary>
+        /// Speed in %/Second the text fades;
+        /// value of 1: 100%/second
+        /// value of 0.5 50%/second
+        /// </summary>
+        private float FadingSpeed;
+
+        #endregion Propeerties
+
+        public HitValue(float value, Vector2 location,  float fadingSpeed=1)
+        {
+            Value = value;
+            FadingSpeed = fadingSpeed;
+            _rectangle = new Rectangle((int)location.X, (int)location.Y, value.ToString().Length*20, 20);
+        }
+
+        public void Update()
+        {
+            Solidity -= FadingSpeed * BattleScene.dt;
+        }
+
+        public void Draw()
+        {
+            GraphicManager.DrawCenteredText(Value.ToString(), Font, _rectangle, Color, scale:1.5f);
         }
     }
 }

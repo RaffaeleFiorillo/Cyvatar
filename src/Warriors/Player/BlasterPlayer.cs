@@ -67,10 +67,17 @@ namespace Cyvatar.src.Warriors
 
         public override void TakeDamageFrom(Damager damager)
         {
-            if (State != PlayerState.Block)
-            {
-                AddHp(-damager.Damage);
-            }
+            if (State == PlayerState.Block && forceField.BarrierIsComplete)
+                return;
+
+            float damageTaken = damager.DealsContinuousDamage ? damager.Damage * BattleScene.dt : damager.Damage;
+
+            // There cannot be more than 4 Hits displayed at once.
+            if (HitValues.Count > 6) HitValues.RemoveAt(0);
+            HitValues.Add(new HitValue(damageTaken, CreateRandomHitValuePosition(100, centerIsLeft:true)));  // Display the damage taken on the screen
+            
+            Hp -= damageTaken;
+            AddHp(-damager.Damage);
         }
 
         protected override void Attack()

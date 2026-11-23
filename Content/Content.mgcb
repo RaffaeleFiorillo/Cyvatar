@@ -13,3 +13,19 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin HitFont.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/processorParam:Version=3.8.6.1
+/build:HitFont.spritefont
+
+#begin HPFont.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/processorParam:Version=3.8.6.1
+/build:HPFont.spritefont
+

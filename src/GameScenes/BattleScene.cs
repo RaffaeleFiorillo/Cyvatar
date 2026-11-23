@@ -21,6 +21,8 @@ namespace Cyvatar.src.GameScenes
         private Texture2D _background;
         private Texture2D _frontBase;
 
+        public static readonly SpriteFont HpFont = GraphicManager.LoadFont("HPFont");
+
         // Game objects
         // private BlasterPlayer _player;
         private BasePlayer _player;

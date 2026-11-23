@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Cyvatar.src.GameScenes;
 
 namespace Cyvatar.src.Warriors
 {
@@ -16,6 +17,7 @@ namespace Cyvatar.src.Warriors
         private readonly Vector2 _statsImageCoo = new Vector2(0, 0);
         private readonly Vector2 _manaBarrImageCoo = new Vector2(169, 51);
         private readonly Vector2 _taroksHudImageCoo = new Vector2(732, 0);
+        private readonly Rectangle HpTextRectanlge = new Rectangle(58, 10, 70, 30);
 
         #region Images
 
@@ -116,6 +118,9 @@ namespace Cyvatar.src.Warriors
 
             // Main HUD frame
             screen.Draw(_playerHudImage, _statsImageCoo, Color.White);
+
+            GraphicManager.DrawCenteredText(_player.Hp.ToString(), BattleScene.HpFont, HpTextRectanlge, Color.White);
+            // GraphicManager.DrawRectangle(HpTextRectanlge, Color.Red);
 
             // Current attack mode icon
             screen.Draw(_attackModeImages[_player.CurrentAttackMode], _attackModeIconCoo, Color.White);

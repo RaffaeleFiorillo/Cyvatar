@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -8,6 +10,7 @@ namespace Cyvatar.src
     public static class GraphicManager
     {
         public static SpriteBatch Screen;
+        public static ContentManager Content;
         public static string BaseImagePath = Path.Combine(Directory.GetCurrentDirectory(), "Content", "Images");
 
         // Helper to draw colored rectangles (since MonoGame has no built-in DrawRectangle with color)
@@ -69,6 +72,87 @@ namespace Cyvatar.src
             }
 
             Screen.Draw(_pixel, rect, color);
+        }
+
+        public static SpriteFont LoadFont(string fontName)
+        {
+           SpriteFont font = Content.Load<SpriteFont>(fontName);
+            return font;
+        }
+
+        /// <summary>
+        /// Displays Text on the screen, inside the limits of a given rectangle.
+        /// </summary>
+        /// <param name="font">Font of the Text.</param>
+        /// <param name="text">The text that will be written on the screen.</param>
+        /// <param name="area">Informs the bounds of the text and the position of where the text will be on the screen.</param>
+        /// <param name="color">Color of the Text.</param>
+        /// <param name="padding">The mount of empty space surrounding the text.</param>
+        public static void DrawPaddedText
+            (
+                string text,
+                SpriteFont font,
+                Rectangle area,
+                Color color,
+                int padding = 0
+            )
+        {
+            Vector2 textSize = font.MeasureString(text);
+
+            // Available space inside the rectangle
+            float availableWidth = area.Width - padding * 2;
+            float availableHeight = area.Height - padding * 2;
+
+            // Scale text down if necessary
+            float scale = Math.Min(
+                1f,
+                Math.Min(
+                    availableWidth / textSize.X,
+                    availableHeight / textSize.Y
+                )
+            );
+
+            Vector2 position = new Vector2(
+                area.X + (area.Width - textSize.X * scale) / 2f,
+                area.Y + (area.Height - textSize.Y * scale) / 2f
+            );
+
+            Screen.DrawString(
+                font,
+                text,
+                position,
+                color,
+                0f,
+                Vector2.Zero,
+                scale,
+                SpriteEffects.None,
+                0f
+            );
+        }
+
+        public static void DrawCenteredText(
+                string text,
+                SpriteFont font,
+                Rectangle area,
+                Color color,
+                int padding = 5,
+                float scale = 1f
+            )
+        {
+            Vector2 textSize = font.MeasureString(text) * scale;
+
+            // Available area after padding
+            int availableWidth = area.Width - padding * 2;
+            int availableHeight = area.Height - padding * 2;
+
+            // Center the text inside the padded area
+            Vector2 position = new Vector2(
+                area.X + padding + (availableWidth - textSize.X) / 2f,
+                area.Y + padding + (availableHeight - textSize.Y) / 2f
+            );
+
+            Screen.DrawString(font, text, position, color, 0f,
+                Vector2.Zero, scale, SpriteEffects.None, 0f);
         }
     }
 }

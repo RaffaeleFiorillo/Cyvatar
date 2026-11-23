@@ -42,6 +42,7 @@ namespace Cyvatar.src.Warriors
             Coo = new Vector2(X * 197, Y * -145 + 820);
             MoveSet?.UpdateCoordinates(Coo);
             DeathAnimation?.UpdateCoordinates(Coo);
+            HitValues.RemoveAll(hv => true);
         }
 
         protected override void Move()

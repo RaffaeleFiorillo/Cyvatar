@@ -166,6 +166,7 @@ namespace Cyvatar.src.Warriors
             if (hasMoved)
             {
                 MovementCurrentCooldown = MovementTotalCooldown;
+                HitValues.RemoveAll( hv => true);
                 HitBox = new Rectangle((int)Coo.X, (int)Coo.Y + 100, 160, 120);
                 AddEnergy(-MovementEnergyCost);
             }

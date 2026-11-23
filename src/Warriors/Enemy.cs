@@ -80,7 +80,11 @@ namespace Cyvatar.src.Warriors
 
         public override void TakeDamageFrom(Damager damager)
         {
-            Hp -= damager.DealsContinuousDamage ? damager.Damage*BattleScene.dt : damager.Damage;
+            float damageTaken = damager.DealsContinuousDamage ? damager.Damage * BattleScene.dt : damager.Damage;
+            if (HitValues.Count > 5) HitValues.RemoveAt(0);
+            HitValues.Add(new HitValue(damageTaken, CreateRandomHitValuePosition()));  // Display the damage taken on the screen
+            Hp -= damageTaken;
+
             // Debug.WriteLine($"Hit! Remaining {Hp}");
 
             float hpPercentage = Hp / MaxHp;
@@ -99,6 +103,8 @@ namespace Cyvatar.src.Warriors
 
         public override void Update()
         {
+            base.Update();
+
             MovingCooldownTime -= BattleScene.dt;
 
             switch (State)
@@ -144,6 +150,8 @@ namespace Cyvatar.src.Warriors
                     GraphicManager.Screen.Draw(IdleImage, Coo, Color.White);
                     break;
             }
+
+            foreach (var hitValue in HitValues) hitValue.Draw();
         }
     }
 }
