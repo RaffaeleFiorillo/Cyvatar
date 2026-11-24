@@ -252,6 +252,7 @@ namespace Cyvatar.src.Warriors
 
         public override void Draw()
         {
+            // GraphicManager.DrawRectangle(HitBox, Color.Blue);
             if (Images.ContainsKey(State))
                 GraphicManager.Screen.Draw(Images[State], Coo, Color.White);
 

@@ -9,7 +9,7 @@ This table shows stuff to be done in the future (to expand the game or to fix bu
 -------------------------------------------------------------------------------------------------------------------------
   2  | Add a multi-arrow attack for the Archer Goblin                                    |  Done   |      4       |  4  |
 -------------------------------------------------------------------------------------------------------------------------
-  3  | Add a closeup spear attack for the Spear Goblin                                   | Pendent |      4       |  4  |
+  3  | Add a closeup spear attack for the Spear Goblin                                   |  Done   |      4       |  4  |
 -------------------------------------------------------------------------------------------------------------------------
   4  | Create a Shaman Goblin Enemy                                                      | Pendent |      5       |  8  |
 -------------------------------------------------------------------------------------------------------------------------
@@ -21,5 +21,7 @@ This table shows stuff to be done in the future (to expand the game or to fix bu
 -------------------------------------------------------------------------------------------------------------------------
   8  | Show how many actions are possible for a certain amount of Available action       | Pendent |      3       |  5  |
 -------------------------------------------------------------------------------------------------------------------------
-  9  | Improve key bindings following the logic of a better Control system.              | Pendent |      6       |  7  |
+  9  | Improve key bindings following the logic of a better Control system.              | Pendent |      5       |  6  |
+-------------------------------------------------------------------------------------------------------------------------
+  10 | Implement Enemy Vision to improve action making decisions                         | Pendent |      5       |  5  |
 -------------------------------------------------------------------------------------------------------------------------

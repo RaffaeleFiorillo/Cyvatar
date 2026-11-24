@@ -82,21 +82,15 @@ namespace Cyvatar.src.Weapons
         public Animation AttackAnimation;
 
         /// <summary>
-        /// Type of Damager to be instanciated when this attack is used.
-        /// </summary>
-        protected Type DamagerType;
-
-        /// <summary>
         /// Time the enemy has to wait after using this attack.
         /// </summary>
         public float CooldownTime;
 
         public bool HasEnded = false;
 
-        public Attack(Animation attackAnimation, Type damagerType, float cooldownTime)
+        public Attack(Animation attackAnimation, float cooldownTime)
         {
             AttackAnimation = attackAnimation;
-            DamagerType = damagerType;
             CooldownTime = cooldownTime;
         }
 

@@ -99,7 +99,7 @@ namespace Cyvatar.src.Utils.Animations
     public abstract class SimpleAnimation: Animation
     {
         protected float LastFrameWaitingTime = 0;
-        protected float LastFrameTotalWaitingTime;
+        protected readonly float LastFrameTotalWaitingTime;
 
         public SimpleAnimation(
             string framesPath,
@@ -135,6 +135,73 @@ namespace Cyvatar.src.Utils.Animations
         public override void Reset()
         {
             base.Reset();
+            LastFrameWaitingTime = LastFrameTotalWaitingTime;
+            HasEnded = false;
+        }
+    }
+
+    /// <summary>
+    /// This class implements an animation where the frames go from start to end and then go backwards from the end to the start.
+    /// It is possible to customize a pausing interval, before the animation goes backwards.
+    /// </summary>
+    public abstract class BoomerangAnimation : Animation
+    {
+        protected float LastFrameWaitingTime = 0;
+        protected readonly float LastFrameTotalWaitingTime;
+        public bool GoingForward = true;
+        public bool AtMiddlePoint = false;
+
+        public BoomerangAnimation(
+            string framesPath,
+            Vector2 initialPosition,
+            int framesCount,
+            float frameSpeed=10,
+            float lastFrameWaitingTime=0,
+            float imageScale = 1
+        ) : base(framesPath, initialPosition, framesCount, frameSpeed, imageScale)
+        {
+            LastFrameTotalWaitingTime = lastFrameWaitingTime;
+            Reset();
+        }
+
+        public override void Update(float dt)
+        {
+            if (HasEnded)
+                return;
+
+            if (GoingForward)
+            {
+                _currentFrame += _frameSpeed * dt;
+
+                if (_currentFrame >= FrameCount - 1)
+                {
+                    _currentFrame = FrameCount - 1;
+                    GoingForward = false;
+                }
+                return;
+            }
+
+            AtMiddlePoint = true;
+
+            LastFrameWaitingTime -= dt;
+            if (LastFrameWaitingTime <= 0)
+            {
+                AtMiddlePoint = false;
+                _currentFrame -= _frameSpeed * dt;
+
+                if (_currentFrame <= 0)
+                {
+                    _currentFrame = 0;
+                    HasEnded = true;
+                }
+            }
+        }
+
+        public override void Reset()
+        {
+            base.Reset();
+            GoingForward = true;
+            AtMiddlePoint = false;
             LastFrameWaitingTime = LastFrameTotalWaitingTime;
             HasEnded = false;
         }

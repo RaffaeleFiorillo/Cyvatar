@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 
 namespace Cyvatar.src.Weapons
 {
+    /// <summary>
+    /// Informs to which side of the Warriors the Damager serves its purpose.
+    /// </summary>
     public enum OriginType
     {
         /// <summary>
@@ -76,6 +79,34 @@ namespace Cyvatar.src.Weapons
         public abstract void Update();
 
         public abstract void Draw();
+    }
+
+    public abstract class InvisibleDamager : Damager
+    {
+        protected Rectangle _hitBox;
+
+        public InvisibleDamager(OriginType origin, float damage, Vector2 referenceCoo) : base(origin, damage)
+        {
+            GenerateHitbox(referenceCoo);
+        }
+
+
+        /// <summary>
+        /// This method creates the hitbox for the damager based on a set of coordinates.
+        /// </summary>
+        /// <param name="referenceCoo"></param>
+        protected abstract void GenerateHitbox(Vector2 referenceCoo);
+
+        public override Rectangle GetHitbox() { return _hitBox; }
+
+        public void Destroy() { Integrity = 0; }
+
+        public override void Update(){}
+
+        public override void Draw() 
+        { 
+            // GraphicManager.DrawRectangle(_hitBox, Color.Red);
+        }
     }
 
     public abstract class SimpleProjectile : Damager

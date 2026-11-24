@@ -75,6 +75,7 @@ namespace Cyvatar.src.Warriors
         }
     }
 
+
     public class ArrowGoblinDeathAnimation : SimpleAnimation
     {
         public ArrowGoblinDeathAnimation(Vector2 goblinPosition, float imageScale) : base
@@ -104,13 +105,15 @@ namespace Cyvatar.src.Warriors
         }
     }
 
+
+    #region Attacks
+
     public class ArrowAttack : Attack
     {
         private bool HasAttacked = false;
 
         public ArrowAttack(Vector2 goblinCoo, float imageScale) : base(
             new ShootAnimation(goblinCoo, imageScale),
-            typeof(GoblinArrow),
             0.5f  // Cooldown time in seconds
         )
         { }
@@ -123,16 +126,13 @@ namespace Cyvatar.src.Warriors
 
         public override void Update(Enemy enemy)
         {
-            if (AttackAnimation.HasEnded)
-            {
-                HasEnded = true;
-            }
+            HasEnded = AttackAnimation.HasEnded;
 
             // On the last frame, if the spear hasn't been thrown yet, it throws it
             if (AttackAnimation.CurrentFrame == AttackAnimation.FrameCount - 1 && !HasAttacked)
             {
                 // Adds the Spear to the list of damagers in the Battle Field
-                BattleScene.Damagers.Add((Damager)Activator.CreateInstance(DamagerType, enemy.Coo));
+                BattleScene.Damagers.Add(new GoblinArrow(enemy.Coo));
                 HasAttacked = true;  // inform that the spear has been thrown
             }
         }
@@ -155,7 +155,6 @@ namespace Cyvatar.src.Warriors
 
         public MultiArrowAttack(Vector2 goblinCoo, float imageScale) : base(
             new ShootAnimation(goblinCoo, imageScale, framespeed:12,lastFrameTime:0),
-            typeof(GoblinArrow),
             2f  // Cooldown time in seconds
         )
         { }
@@ -195,11 +194,12 @@ namespace Cyvatar.src.Warriors
             if (AttackAnimation.CurrentFrame == AttackAnimation.FrameCount - 1 && !HasAttacked)
             {
                 // Adds the Spear to the list of damagers in the Battle Field
-                BattleScene.Damagers.Add((Damager)Activator.CreateInstance(DamagerType, enemy.Coo));
+                BattleScene.Damagers.Add(new GoblinArrow(enemy.Coo));
                 HasAttacked = true;  // inform that the arrow has been shot
             }
         }
     }
+
 
     public class ShootAnimation : SimpleAnimation
     {
@@ -220,4 +220,27 @@ namespace Cyvatar.src.Warriors
             Coo = goblinPosition;
         }
     }
+
+    public class GoblinArrow : SimpleProjectile
+    {
+        private static Texture2D Image;
+        private const float _speed = 900;  // Speed of the spear in m/s
+        private const float _damage = 5;
+
+        public GoblinArrow(Vector2 initialCoo) : base(initialCoo, _damage, _speed, OriginType.EnemyFire)
+        {
+            Coo = new Vector2(initialCoo.X, initialCoo.Y + 50);
+            Image = GameSceneManager.LoadImage(Path.Combine(_baseImagePath, "GoblinArrow.png"), scale: 2.2f);
+        }
+
+        protected override Texture2D GetImage() { return Image; }
+
+        public override Rectangle GetHitbox()
+        {
+            // Example: adjust these values to match the sprite size
+            return new Rectangle((int)Coo.X, (int)Coo.Y, 100, 30);
+        }
+    }
+
+    #endregion Attacks
 }
