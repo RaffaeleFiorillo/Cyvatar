@@ -1,12 +1,13 @@
-﻿using Cyvatar.src.Weapons;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using Cyvatar.src.GameScenes;
+using Cyvatar.src.Battle.Weapons;
 
 
-namespace Cyvatar.src.Warriors
+namespace Cyvatar.src.Battle.Warriors
 {
     public abstract class Warrior
     {
@@ -16,7 +17,7 @@ namespace Cyvatar.src.Warriors
         public int FieldRange = 3;
 
         /// <summary>
-        /// Flag that indicates if the player should be removed from the BattleScene.
+        /// Flag that indicates if the player should be removed from the BattleField.
         /// It occurs when: Hp <= 0 AND DeathAnimation.HasEnded == true.
         /// </summary>
         public bool IsDead = false;
@@ -29,10 +30,30 @@ namespace Cyvatar.src.Warriors
         /// </summary>
         public List<HitValue> HitValues = new List<HitValue>();
 
-        public int X { get => _X; set { _X = value; UpdatePixelCoordinates(); } }
+        public int X 
+        {
+            get => _X; 
+            set 
+            {
+                BattleField.Grid[_X][_Y].warrior = null;
+                _X = value;
+                BattleField.Grid[_X][_Y].warrior = this;
+                UpdatePixelCoordinates(); 
+            } 
+        }
         private int _X;
 
-        public int Y { get => _Y; set { _Y = value; UpdatePixelCoordinates(); } }
+        public int Y
+        {
+            get => _Y; 
+            set 
+            {
+                BattleField.Grid[_X][_Y].warrior = null;
+                _Y = value;
+                BattleField.Grid[_X][_Y].warrior = this;
+                UpdatePixelCoordinates(); 
+            } 
+        }
         private int _Y;
 
         /// <summary>

@@ -1,11 +1,12 @@
-﻿using Cyvatar.src.Weapons;
+﻿using Cyvatar.src.Battle.Weapons;
+using Cyvatar.src.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Cyvatar.src.Warriors
+namespace Cyvatar.src.Battle.Warriors.Player
 {
     public abstract class AttackPlayer : BasePlayer
     {

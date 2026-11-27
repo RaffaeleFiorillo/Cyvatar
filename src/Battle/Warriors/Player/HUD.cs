@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Cyvatar.src.GameScenes;
 
-namespace Cyvatar.src.Warriors
+namespace Cyvatar.src.Battle.Warriors.Player
 {
     public class HUD
     {
@@ -82,7 +82,7 @@ namespace Cyvatar.src.Warriors
 
         public void UpdateHp()
         {
-            float percentage = _player.Hp / AttackPlayer.MaxHp;
+            float percentage = _player.Hp / BasePlayer.MaxHp;
 
             if (percentage > 0.75f)
                 _hpColor = _hpColors["max_life"];

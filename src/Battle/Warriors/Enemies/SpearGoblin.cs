@@ -1,13 +1,13 @@
-﻿using Cyvatar.src.GameScenes;
+﻿using Cyvatar.src.Battle.Weapons;
+using Cyvatar.src.GameScenes;
 using Cyvatar.src.Utils.Animations;
-using Cyvatar.src.Weapons;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Diagnostics;
 using System.IO;
 
-namespace Cyvatar.src.Warriors
+namespace Cyvatar.src.Battle.Warriors
 {
     public class SpearGoblin : Goblin
     {
@@ -130,7 +130,7 @@ namespace Cyvatar.src.Warriors
             if (AttackAnimation.CurrentFrame == AttackAnimation.FrameCount - 1 && !_hasAttacked)
             {
                 // Adds the Spear to the list of damagers in the Battle Field
-                BattleScene.Damagers.Add(new GoblinThrowSpear(enemy.Coo));
+                BattleField.Damagers.Add(new GoblinThrowSpear(enemy.Coo));
                 _hasAttacked = true;  // inform that the spear has been thrown
             }
         }
@@ -214,7 +214,7 @@ namespace Cyvatar.src.Warriors
                     enemy.Coo = new Vector2(enemy.Coo.X - 20, enemy.Coo.Y);  // Make the Goblin go a little further when thrusting.
                     AttackAnimation.UpdateCoordinates(enemy.Coo);
                     _spearHead = new GoblinThrustSpear(enemy.Coo);
-                    BattleScene.Damagers.Add(_spearHead);
+                    BattleField.Damagers.Add(_spearHead);
                     _hasAttacked = true;
                 }
                 return;

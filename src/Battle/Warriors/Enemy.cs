@@ -1,6 +1,6 @@
-﻿using Cyvatar.src.GameScenes;
+﻿using Cyvatar.src.Battle.Weapons;
+using Cyvatar.src.GameScenes;
 using Cyvatar.src.Utils.Animations;
-using Cyvatar.src.Weapons;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -9,7 +9,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
-namespace Cyvatar.src.Warriors
+namespace Cyvatar.src.Battle.Warriors
 {
     public enum EnemyState
     {
@@ -80,7 +80,7 @@ namespace Cyvatar.src.Warriors
 
         public override void TakeDamageFrom(Damager damager)
         {
-            float damageTaken = damager.DealsContinuousDamage ? damager.Damage * BattleScene.dt : damager.Damage;
+            float damageTaken = damager.DealsContinuousDamage ? damager.Damage * GameScene.dt : damager.Damage;
             if (HitValues.Count > 5) HitValues.RemoveAt(0);
             HitValues.Add(new HitValue(damageTaken, CreateRandomHitValuePosition()));  // Display the damage taken on the screen
             Hp -= damageTaken;
@@ -105,12 +105,12 @@ namespace Cyvatar.src.Warriors
         {
             base.Update();
 
-            MovingCooldownTime -= BattleScene.dt;
+            MovingCooldownTime -= GameScene.dt;
 
             switch (State)
             {
                 case EnemyState.Dead:
-                    DeathAnimation.Update(BattleScene.dt);
+                    DeathAnimation.Update(GameScene.dt);
                     break;
 
                 case EnemyState.Attacking:
@@ -121,7 +121,7 @@ namespace Cyvatar.src.Warriors
                     // When not attacking, the Goblin can move at random
                     Move();
                     // When not attacking, the attacking cooldown progresses
-                    AttackingCooldownTime -= BattleScene.dt;
+                    AttackingCooldownTime -= GameScene.dt;
                     if (AttackingCooldownTime <= 0 && Random.Shared.NextDouble() <= AttackingProbability)
                     {
                         State = EnemyState.Attacking;

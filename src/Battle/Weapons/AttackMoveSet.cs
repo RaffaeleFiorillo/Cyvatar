@@ -2,14 +2,14 @@
 using Microsoft.Xna.Framework.Graphics;
 using Cyvatar.src.GameScenes;
 using Cyvatar.src.Utils.Animations;
-using Cyvatar.src.Warriors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Cyvatar.src.Battle.Warriors;
 
-namespace Cyvatar.src.Weapons
+namespace Cyvatar.src.Battle.Weapons
 {
     public class AttackMoveSet
     {
@@ -60,7 +60,7 @@ namespace Cyvatar.src.Weapons
             }
 
             ActiveAttack.Update(MoveSetOwner);
-            ActiveAttack.AttackAnimation.Update(BattleScene.dt);
+            ActiveAttack.AttackAnimation.Update(GameScene.dt);
 
             if (ActiveAttack.HasEnded) EndAttackState();
         }

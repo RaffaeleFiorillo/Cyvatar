@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Cyvatar.src.Warriors
+namespace Cyvatar.src.Battle.Warriors.Player
 {
     /// <summary>
     /// According to the current state of the player, he presents different behaviours.

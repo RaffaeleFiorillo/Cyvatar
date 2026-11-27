@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Cyvatar.src.Weapons
+namespace Cyvatar.src.Battle.Weapons
 {
     /// <summary>
     /// Informs to which side of the Warriors the Damager serves its purpose.
@@ -46,7 +46,7 @@ namespace Cyvatar.src.Weapons
         protected float Integrity=1; 
 
         /// <summary>
-        /// If this Flag is set to true, the Damager should be eliminated from the BattleScene.Damagers list.
+        /// If this Flag is set to true, the Damager should be eliminated from the BattleField.Damagers list.
         /// In other words when ToBeDeleted = True it ceases to exist.
         /// </summary>
         public bool ToBeDeleted { get => Coo.X > GameSceneManager.ScreenWidth || Integrity <= 0; }
@@ -124,7 +124,7 @@ namespace Cyvatar.src.Weapons
 
         public override void Update()
         {
-            Coo.X -= Speed * BattleScene.dt;
+            Coo.X -= Speed * GameScene.dt;
         }
 
         public override void Draw()
@@ -172,7 +172,7 @@ namespace Cyvatar.src.Weapons
 
         public void Update()
         {
-            Solidity -= FadingSpeed * BattleScene.dt;
+            Solidity -= FadingSpeed * GameScene.dt;
         }
 
         public void Draw()

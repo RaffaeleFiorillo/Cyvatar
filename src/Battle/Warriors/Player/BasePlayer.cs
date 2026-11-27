@@ -5,8 +5,10 @@ using System.Collections.Generic;
 using System.IO;
 using Cyvatar.src.GameScenes;
 using Cyvatar.src.Utils.Animations;
+using Cyvatar.src.Battle.Warriors;
+using Cyvatar.src.Utils;
 
-namespace Cyvatar.src.Warriors
+namespace Cyvatar.src.Battle.Warriors.Player
 {
     public abstract class BasePlayer : Warrior
     {
@@ -21,7 +23,7 @@ namespace Cyvatar.src.Warriors
         protected AuraCharge auraCharge;
         protected ForceFieldBarrier forceField;
         // Action mapping (button name → method)
-        protected Dictionary<string, System.Action> PlayerActions;
+        protected Dictionary<string, Action> PlayerActions;
 
         #region Stats
 
@@ -67,7 +69,7 @@ namespace Cyvatar.src.Warriors
             Energy = MaxEnergy;
             SkillPoints = MaxSkillPoints;
 
-            PlayerActions = new Dictionary<string, System.Action>
+            PlayerActions = new Dictionary<string, Action>
             {
                 { "l1", Charge },
                 { "r1", Attack },
@@ -181,7 +183,7 @@ namespace Cyvatar.src.Warriors
             forceField.Stop();
 
             if (Mana < MaxMana && auraCharge.IsCharging)
-                AddMana(ManaChargingSpeed * BattleScene.dt);
+                AddMana(ManaChargingSpeed * GameScene.dt);
 
             if (Mana >= MaxMana)
             {
@@ -196,7 +198,7 @@ namespace Cyvatar.src.Warriors
             if (Energy <= 0 && EnergyDepletionCooldown <= EnergyDepletionTotalCooldown * 0.5f)
             {
                 State = PlayerState.Idle;
-                EnergyDepletionCooldown += BattleScene.dt;
+                EnergyDepletionCooldown += GameScene.dt;
                 return;
             }
 
@@ -213,31 +215,31 @@ namespace Cyvatar.src.Warriors
             {
                 State = PlayerState.Block;
                 if (forceField.BarrierIsComplete)
-                    AddEnergy(-BlockEnergyConsumptionSpeed * BattleScene.dt);
+                    AddEnergy(-BlockEnergyConsumptionSpeed * GameScene.dt);
                 forceField.IsActive = true;
                 return;
             }
 
             forceField.Stop();
             State = PlayerState.Idle;
-            EnergyDepletionCooldown += BattleScene.dt;
+            EnergyDepletionCooldown += GameScene.dt;
         }
 
         #endregion Actions by Input
 
         public override void Update()
         {
-            MovementCurrentCooldown -= BattleScene.dt;
-            EnergyDepletionCooldown -= BattleScene.dt;
-            AttackEnergyChargingCooldownTime -= BattleScene.dt;
+            MovementCurrentCooldown -= GameScene.dt;
+            EnergyDepletionCooldown -= GameScene.dt;
+            AttackEnergyChargingCooldownTime -= GameScene.dt;
             auraCharge.Update();
             forceField.Update();
 
             if (State != PlayerState.Charge)
             {
-                ManaConservationInterval -= BattleScene.dt;
+                ManaConservationInterval -= GameScene.dt;
                 if (ManaConservationInterval <= 0)
-                    AddMana(-ManaDischargingSpeed * BattleScene.dt);
+                    AddMana(-ManaDischargingSpeed * GameScene.dt);
             }
 
             // Energy regeneration
@@ -246,7 +248,7 @@ namespace Cyvatar.src.Warriors
                 if (State == PlayerState.Attack && AttackEnergyChargingCooldownTime > 0)
                     return;
 
-                AddEnergy(EnergyChargingSpeed * BattleScene.dt);
+                AddEnergy(EnergyChargingSpeed * GameScene.dt);
             }
         }
 
@@ -307,7 +309,7 @@ namespace Cyvatar.src.Warriors
             if (!IsActive) return;
 
             _animation.Update();
-            _timeFromStart += BattleScene.dt;
+            _timeFromStart += GameScene.dt;
 
             // When the charging starts, and the Mana is not yet rising
             if (IsStart)
@@ -358,7 +360,7 @@ namespace Cyvatar.src.Warriors
             Coo = new Vector2(playerPosition.X - 205, playerPosition.Y - 195);
         }
 
-        public void Update() { base.Update(BattleScene.dt); }
+        public void Update() { base.Update(GameScene.dt); }
     }
 
     #endregion Mana Aura Charging
@@ -450,7 +452,7 @@ namespace Cyvatar.src.Warriors
             Coo = new Vector2(playerPosition.X + 130, playerPosition.Y);
         }
 
-        public void Update() { base.Update(BattleScene.dt); }
+        public void Update() { base.Update(GameScene.dt); }
     }
 
     public class BlockingAnimation : SimpleAnimation
@@ -477,7 +479,7 @@ namespace Cyvatar.src.Warriors
             Coo = new Vector2(playerPosition.X-10, playerPosition.Y -20);
         }
 
-        public void Update() { base.Update(BattleScene.dt); }
+        public void Update() { base.Update(GameScene.dt); }
     }
 
     #endregion Force Field Barrier

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework.Audio;
 using System.IO;
 
-namespace Cyvatar.src
+namespace Cyvatar.src.Utils
 {
     public class Sound
     {

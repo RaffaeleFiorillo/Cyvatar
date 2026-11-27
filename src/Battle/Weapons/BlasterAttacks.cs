@@ -8,8 +8,9 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Diagnostics;
 using Cyvatar.src.GameScenes;
+using Cyvatar.src.Utils;
 
-namespace Cyvatar.src.Weapons.BlasterAttacks
+namespace Cyvatar.src.Battle.Weapons
 {
     public abstract class Bullet: Damager
     {
@@ -65,8 +66,8 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
 
         public override void Update()
         {
-            CurrentFrame = (CurrentFrame + FrameSpeed * BattleScene.dt) % Frames.Count;
-            Coo.X += Speed*BattleScene.dt;
+            CurrentFrame = (CurrentFrame + FrameSpeed * GameScene.dt) % Frames.Count;
+            Coo.X += Speed* GameScene.dt;
         }
     }
 
@@ -107,8 +108,8 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
 
         public override void Update()
         {
-            CurrentFrame = (CurrentFrame + FrameSpeed * BattleScene.dt) % Frames.Count;
-            Coo.X += Speed*BattleScene.dt;
+            CurrentFrame = (CurrentFrame + FrameSpeed * GameScene.dt) % Frames.Count;
+            Coo.X += Speed* GameScene.dt;
         }
     }
 
@@ -148,12 +149,12 @@ namespace Cyvatar.src.Weapons.BlasterAttacks
 
         public override void Update()
         {
-            CurrentFrame += FrameSpeed * BattleScene.dt;
+            CurrentFrame += FrameSpeed * GameScene.dt;
             if (CurrentFrame < Frames.Count-1)
-                Coo = new Vector2(Coo.X + Speed * BattleScene.dt, Coo.Y);
+                Coo = new Vector2(Coo.X + Speed * GameScene.dt, Coo.Y);
             else if (Random.Shared.NextDouble() > 0.75f)
             {
-                Coo.X += Speed * BattleScene.dt;
+                Coo.X += Speed * GameScene.dt;
                 // Quantum bullet can switch between 4 rows where Y = 550, 450, 350, 250
                 int randomRow = Random.Shared.Next(0, 4);
                 Coo.Y = randomRow * 150 + 440;

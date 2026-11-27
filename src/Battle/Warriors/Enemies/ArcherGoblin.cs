@@ -1,6 +1,6 @@
-﻿using Cyvatar.src.GameScenes;
+﻿using Cyvatar.src.Battle.Weapons;
+using Cyvatar.src.GameScenes;
 using Cyvatar.src.Utils.Animations;
-using Cyvatar.src.Weapons;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -9,7 +9,7 @@ using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.IO;
 
-namespace Cyvatar.src.Warriors
+namespace Cyvatar.src.Battle.Warriors
 {
     public class ArcherGoblin : Goblin
     {
@@ -132,7 +132,7 @@ namespace Cyvatar.src.Warriors
             if (AttackAnimation.CurrentFrame == AttackAnimation.FrameCount - 1 && !HasAttacked)
             {
                 // Adds the Spear to the list of damagers in the Battle Field
-                BattleScene.Damagers.Add(new GoblinArrow(enemy.Coo));
+                BattleField.Damagers.Add(new GoblinArrow(enemy.Coo));
                 HasAttacked = true;  // inform that the spear has been thrown
             }
         }
@@ -181,7 +181,7 @@ namespace Cyvatar.src.Warriors
                 if (attackNumber == 0)
                 {
                     HasEnded = FinalPoseTime <= 0; // Inform that the Attack has ended
-                    FinalPoseTime -= BattleScene.dt;
+                    FinalPoseTime -= GameScene.dt;
                     return;
                 }
 
@@ -194,7 +194,7 @@ namespace Cyvatar.src.Warriors
             if (AttackAnimation.CurrentFrame == AttackAnimation.FrameCount - 1 && !HasAttacked)
             {
                 // Adds the Spear to the list of damagers in the Battle Field
-                BattleScene.Damagers.Add(new GoblinArrow(enemy.Coo));
+                BattleField.Damagers.Add(new GoblinArrow(enemy.Coo));
                 HasAttacked = true;  // inform that the arrow has been shot
             }
         }

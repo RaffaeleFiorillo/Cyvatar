@@ -5,11 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
-using Cyvatar.src.Weapons.BlasterAttacks;
 using Cyvatar.src.GameScenes;
-using Cyvatar.src.Weapons;
+using Cyvatar.src.Battle.Weapons;
 
-namespace Cyvatar.src.Warriors
+namespace Cyvatar.src.Battle.Warriors.Player
 {
     public class BlasterPlayer : AttackPlayer
     {
@@ -40,7 +39,7 @@ namespace Cyvatar.src.Warriors
         private void AttackMode1()
         {
             ShootingCurrentCooldownTime = BoltBullet.CooldownTime;
-            BattleScene.Damagers.Add(new BoltBullet(Coo, WeaponLevel));
+            BattleField.Damagers.Add(new BoltBullet(Coo, WeaponLevel));
             AddEnergy(-BoltBullet.EnergyCost);
         }
 
@@ -48,7 +47,7 @@ namespace Cyvatar.src.Warriors
         private void AttackMode2()
         {
             ShootingCurrentCooldownTime = ElectronBullet.CooldownTime;
-            BattleScene.Damagers.Add(new ElectronBullet(Coo, WeaponLevel));
+            BattleField.Damagers.Add(new ElectronBullet(Coo, WeaponLevel));
             AddEnergy(-ElectronBullet.EnergyCost);
         }
 
@@ -56,7 +55,7 @@ namespace Cyvatar.src.Warriors
         private void AttackMode3()
         {
             ShootingCurrentCooldownTime = QuantumBullet.CooldownTime;
-            BattleScene.Damagers.Add(new QuantumBullet(Coo, WeaponLevel));
+            BattleField.Damagers.Add(new QuantumBullet(Coo, WeaponLevel));
             AddEnergy(-QuantumBullet.EnergyCost);
         }
 
@@ -70,7 +69,7 @@ namespace Cyvatar.src.Warriors
             if (State == PlayerState.Block && forceField.BarrierIsComplete)
                 return;
 
-            float damageTaken = damager.DealsContinuousDamage ? damager.Damage * BattleScene.dt : damager.Damage;
+            float damageTaken = damager.DealsContinuousDamage ? damager.Damage * GameScene.dt : damager.Damage;
 
             // There cannot be more than 4 Hits displayed at once.
             if (HitValues.Count > 6) HitValues.RemoveAt(0);
@@ -91,7 +90,7 @@ namespace Cyvatar.src.Warriors
                 AttackEnergyChargingCooldownTime = AttackEnergyChargingMaxTime;
 
                 // Remove bullets that have left the screen
-                BattleScene.Damagers.RemoveAll(damager => damager.Coo.X >= GameSceneManager.ScreenWidth);
+                BattleField.Damagers.RemoveAll(damager => damager.Coo.X >= GameSceneManager.ScreenWidth);
             }
         }
 
@@ -99,7 +98,7 @@ namespace Cyvatar.src.Warriors
         {
             base.Update();
             // Reduce shooting cooldown
-            ShootingCurrentCooldownTime -= BattleScene.dt;
+            ShootingCurrentCooldownTime -= GameScene.dt;
         }
     }
 }

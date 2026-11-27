@@ -1,9 +1,9 @@
-﻿using Cyvatar.src.Weapons;
+﻿using Cyvatar.src.Battle.Weapons;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.IO;
 
-namespace Cyvatar.src.Warriors
+namespace Cyvatar.src.Battle.Warriors
 {
     public enum GoblinType
     {
