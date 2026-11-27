@@ -12,9 +12,9 @@ namespace Cyvatar.src.Battle.Warriors
     public abstract class Warrior
     {
         /// <summary>
-        /// The player can only move on tiles with x < PLAYER_FIELD_RANGE.
+        /// Informs on which side of the field this warrior stands (Player or Enemy)
         /// </summary>
-        public int FieldRange = 3;
+        public FieldSide Side;
 
         /// <summary>
         /// Flag that indicates if the player should be removed from the BattleField.
@@ -35,10 +35,9 @@ namespace Cyvatar.src.Battle.Warriors
             get => _X; 
             set 
             {
-                BattleField.Grid[_X][_Y].warrior = null;
+                BattleField.PlaceWarriorInCell(this, value, Y);
                 _X = value;
-                BattleField.Grid[_X][_Y].warrior = this;
-                UpdatePixelCoordinates(); 
+                UpdateAfterMovement(); 
             } 
         }
         private int _X;
@@ -48,10 +47,9 @@ namespace Cyvatar.src.Battle.Warriors
             get => _Y; 
             set 
             {
-                BattleField.Grid[_X][_Y].warrior = null;
+                BattleField.PlaceWarriorInCell(this, X, value);
                 _Y = value;
-                BattleField.Grid[_X][_Y].warrior = this;
-                UpdatePixelCoordinates(); 
+                UpdateAfterMovement(); 
             } 
         }
         private int _Y;
@@ -62,18 +60,19 @@ namespace Cyvatar.src.Battle.Warriors
         public Vector2 Coo;
         public Rectangle HitBox;
 
-        protected Warrior(int x, int y, float hp)
+        protected Warrior(int x, int y, float hp, FieldSide side)
         {
             X = x;
             Y = y;
             Hp = hp;
+            Side = side;
         }
 
         /// <summary>
         /// Converts the grid position (X, Y) into actual pixel coordinates on the screen.
         /// It is automatically called every time the values of X or Y are changed;
         /// </summary>
-        public abstract void UpdatePixelCoordinates();
+        public abstract void UpdateAfterMovement();
 
         public bool CollidesWith(Rectangle otherBounds)
         {

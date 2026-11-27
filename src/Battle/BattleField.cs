@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Cyvatar.src.Battle
@@ -18,9 +19,9 @@ namespace Cyvatar.src.Battle
     {
         #region Properties
 
-        public int ColumnCount = 10;
-        public int RowCount = 4;
-        public static List<List<FieldCell>> Grid = new List<List<FieldCell>>();
+        public const int ColumnCount = 10;
+        public const int RowCount = 4;
+        private static List<List<FieldCell>> Grid = new List<List<FieldCell>>();
 
         // Game Actors
         private BasePlayer _player;
@@ -42,8 +43,11 @@ namespace Cyvatar.src.Battle
                 List<FieldCell> column = new List<FieldCell>();
 
                 for (int y = 0; y < RowCount; y++)
-                    column.Add(new FieldCell());
-
+                {
+                    var cellSide = x < (int)ColumnCount / 2 ? FieldSide.Player : FieldSide.Enemy;
+                    column.Add(new FieldCell(cellSide));
+                }
+                    
                 Grid.Add(column);
             }
         }
@@ -76,6 +80,24 @@ namespace Cyvatar.src.Battle
             Enemies.Add(new SpearGoblin());
             Enemies.Add(new ArcherGoblin());
             Enemies.Add(new ArcherGoblin());
+        }
+
+        public static bool WarriorIsAllowedOnCell(Warrior warrior, int x, int y)
+        {
+            if (x >= 0 && x < ColumnCount && y >= 0 && y < RowCount)
+                return !Grid[x][y].IsUnoccupied && warrior.Side == Grid[x][y].Side;
+            return false;
+        }
+
+        public static bool EffectIsAllowedOnCell(FieldCellEffect effect, int x, int y)
+        {
+            return Grid[x][y].Effect == null;
+        }
+
+        public static void PlaceWarriorInCell(Warrior warrior, int x, int y)
+        {
+            Grid[warrior.X][warrior.Y].warrior = null; // Remove warrior from previous position
+            Grid[x][y].warrior = warrior;  // Place warrior into new position
         }
 
         public void Update(float dt, List<string> pressedButtons)
@@ -177,5 +199,10 @@ namespace Cyvatar.src.Battle
         /// This Flag informs if a Warrior can move on this Cell (true) or not (false).
         /// </summary>
         public bool IsUnoccupied { get => warrior != null; }
+
+        public FieldCell(FieldSide side)
+        {
+            Side = side;
+        }
     }
 }

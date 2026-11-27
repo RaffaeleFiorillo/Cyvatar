@@ -23,5 +23,5 @@ This table shows stuff to be done in the future (to expand the game or to fix bu
 -------------------------------------------------------------------------------------------------------------------------
   9  | Improve key bindings following the logic of a better Control system.              | Pendent |      5       |  6  |
 -------------------------------------------------------------------------------------------------------------------------
-  10 | Implement Enemy Vision to improve action making decisions                         | Pendent |      5       |  5  |
+  10 | Implement Enemy Vision to improve action making decisions                         |  Done   |      5       |  5  |
 -------------------------------------------------------------------------------------------------------------------------

@@ -64,7 +64,7 @@ namespace Cyvatar.src.Battle.Warriors.Player
 
         #endregion Mana
 
-        public BasePlayer() : base(2, 2, MaxHp) // Starting grid position
+        public BasePlayer() : base(2, 2, MaxHp, FieldSide.Player) // Starting grid position
         {
             Energy = MaxEnergy;
             SkillPoints = MaxSkillPoints;
@@ -82,16 +82,27 @@ namespace Cyvatar.src.Battle.Warriors.Player
         }
 
         /// <summary>
-        /// The position of the player is based on a discrete X, Y coordinates system that locates him on the 8X4 BattleField Grid.
-        /// But those coordinates must be converted to pixel coordinates for him to be displayed on the Screen.
-        /// This method does the conversion, and is automatically called every time the X and/or Y coordinates of the player are changed.
+        /// After the Player moves, some actions must be performed to him to reflect that action:
+        /// 1 - The position of the player is based on a discrete X, Y coordinates system that locates him on the 8X4 BattleField Grid.
+        ///     But those coordinates must be converted to pixel coordinates for him to be displayed on the Screen.
+        ///     This method does the conversion, and is automatically called every time the X and/or Y coordinates of the player are changed;
+        /// 2 - Decrease the energy of the player to reflect its usage AND add a cooldown for the next movement;
+        /// 3 - Update the position of the animations associated to the player;
+        /// 4 - Upate the Hitbox of the Player;
+        /// 5 - Remove visual effects associated to the previous position;
         /// </summary>
-        public override void UpdatePixelCoordinates()
+        public override void UpdateAfterMovement()
         {
             Coo = new Vector2(X * 190, Y * -150 + 757);
 
+            MovementCurrentCooldown = MovementTotalCooldown;
+            AddEnergy(-MovementEnergyCost);
+
             auraCharge?.UpdateCoordinates(Coo);
             forceField?.UpdateCoordinates(Coo);
+
+            HitValues.RemoveAll(hv => true);
+            HitBox = new Rectangle((int)Coo.X, (int)Coo.Y + 100, 160, 120);
         }
 
         #region Stats Alteration
@@ -142,38 +153,21 @@ namespace Cyvatar.src.Battle.Warriors.Player
 
         protected virtual bool Movement(List<string> pressedButtons)
         {
-            bool hasMoved = false;
-
-            if (Y > 0 && pressedButtons.Contains("down"))
+            int newY = pressedButtons.Contains("down") ? Y-1 : pressedButtons.Contains("up") ? Y+1 : Y;
+            if (newY != Y && BattleField.WarriorIsAllowedOnCell(this, X, newY))
             {
-                Y--;
-                hasMoved = true;
-            }
-            else if (Y < 3 && pressedButtons.Contains("up"))
-            {
-                Y++;
-                hasMoved = true;
-            }
-            else if (X > 0 && pressedButtons.Contains("left"))
-            {
-                X--;
-                hasMoved = true;
-            }
-            else if (X <= FieldRange && pressedButtons.Contains("right"))
-            {
-                X++;
-                hasMoved = true;
+                Y = newY;
+                return true;
             }
 
-            if (hasMoved)
+            int newX = pressedButtons.Contains("left") ? X-1 : pressedButtons.Contains("right") ? X+1 : X;
+            if (newX != X && BattleField.WarriorIsAllowedOnCell(this, newX, Y))
             {
-                MovementCurrentCooldown = MovementTotalCooldown;
-                HitValues.RemoveAll( hv => true);
-                HitBox = new Rectangle((int)Coo.X, (int)Coo.Y + 100, 160, 120);
-                AddEnergy(-MovementEnergyCost);
+                X = newX;
+                return true;
             }
 
-            return hasMoved;
+            return false;
         }
 
         protected virtual void Charge()
