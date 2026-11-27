@@ -59,24 +59,53 @@ namespace Cyvatar.src.Battle.Warriors
         protected float AttackingProbability;
         public float AttackingCooldownTime;
 
-        protected float MovingCooldownTime;
-
         /// <summary>
         /// Flag that indicates if the Enemy should be Removed from the Battle Field.
         /// </summary>
         new public bool IsDead { get => State == EnemyState.Dead && DeathAnimation.HasEnded; }
-
         protected SimpleAnimation DeathAnimation;
+
+        protected float XMovingProbability = 0.025f;
+        protected float YMovingProbability = 0.035f;
+        protected float MovingCooldownTime;
+        protected float MaxMovingCooldownTime = 1f;
 
         #endregion Properties
 
-        protected Enemy(int x, int y, float hp) : base(x, y, hp){}
+        protected Enemy(int x, int y, float hp) : base(x, y, hp, FieldSide.Enemy){}
 
         /// <summary>
         /// Moving logic of the enemy
         /// </summary>
         /// <returns>true if the player has moved; false: if the player stayed in the same position</returns>
         protected abstract void Move();
+
+        protected void RandomCroxMovement()
+        {
+            if (MovingCooldownTime > 0)
+                return;
+
+            if (Random.Shared.NextDouble() < YMovingProbability)
+            {
+                int newY = Random.Shared.NextDouble() > 0.5f ? Y-1 : Y+1;
+                if (newY != Y && BattleField.WarriorIsAllowedOnCell(this, X, newY))
+                {
+                    Y = newY;
+                    MovingCooldownTime = MaxMovingCooldownTime;
+                    return;
+                }
+            }
+
+            if (Random.Shared.NextDouble() < XMovingProbability)
+            {
+                int newX = Random.Shared.NextDouble() > 0.5f ? X-1 : X+1;
+                if (newX != X && BattleField.WarriorIsAllowedOnCell(this, newX, Y))
+                {
+                    X = newX;
+                    MovingCooldownTime = MaxMovingCooldownTime;
+                }
+            }
+        }
 
         public override void TakeDamageFrom(Damager damager)
         {

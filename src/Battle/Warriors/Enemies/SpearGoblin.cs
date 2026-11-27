@@ -23,8 +23,7 @@ namespace Cyvatar.src.Battle.Warriors
         {
             MoveSet = new SpearGoblinMoveSet(this, _imageScale);
             DeathAnimation = new SpearGoblinDeathAnimation(Coo, _imageScale);
-            UpdatePixelCoordinates();
-            FieldRange = 3;
+            UpdateAfterMovement();
             HitBox = new Rectangle((int)Coo.X + 20, (int)Coo.Y + 30, 100, 120);
 
             MaxHp = 100;
@@ -35,41 +34,22 @@ namespace Cyvatar.src.Battle.Warriors
             AttackingProbability = 0.015f;
         }
 
-        public override void UpdatePixelCoordinates()
+        public override void UpdateAfterMovement()
         {
             Coo = new Vector2(X*197, Y*-145 + 820);
             MoveSet?.UpdateCoordinates(Coo);
             DeathAnimation?.UpdateCoordinates(Coo);
             HitValues.RemoveAll(hv => true);
+
+            HitBox.X = (int)Coo.X + 20;
+            HpRectangle.X = (int)Coo.X + 2;
+            HitBox.Y = (int)Coo.Y + 30;
+            HpRectangle.Y = (int)Coo.Y + 5;
         }
 
         protected override void Move()
         {
-            if (MovingCooldownTime <= 0)
-            {
-                if (Random.Shared.NextDouble() < YMovingProbability)
-                {
-                    if (Random.Shared.NextDouble() > 0.5f)
-                        Y += Y < 3 ? 1 : 0;
-                    else
-                        Y -= Y > 0 ? 1 : 0;
-                    MovingCooldownTime = MaxMovingCooldownTime;
-
-                    HitBox.Y = (int)Coo.Y + 30;
-                    HpRectangle.Y = (int)Coo.Y + 5;
-                }
-                else if (Random.Shared.NextDouble() < XMovingProbability)
-                {
-                    if (Random.Shared.NextDouble() > 0.5f)
-                        X += X < 9 ? 1 : 0;
-                    else
-                        X -= X >= 9 - FieldRange ? 1 : 0;
-                    MovingCooldownTime = MaxMovingCooldownTime;
-
-                    HitBox.X = (int)Coo.X + 20;
-                    HpRectangle.X = (int)Coo.X + 2;
-                }
-            }
+            RandomCroxMovement();
         }
     }
 
