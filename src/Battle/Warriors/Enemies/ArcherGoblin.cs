@@ -38,7 +38,7 @@ namespace Cyvatar.src.Battle.Warriors
 
         public override void UpdateAfterMovement()
         {
-            Coo = new Vector2(X * 197, Y * -145 + 820);
+            Coo = new Vector2(20+X * 191, Y*-145 + 820);
             MoveSet?.UpdateCoordinates(Coo);
             DeathAnimation?.UpdateCoordinates(Coo);
             HitValues.RemoveAll(hv => true);
@@ -47,6 +47,11 @@ namespace Cyvatar.src.Battle.Warriors
             HpRectangle.X = (int)Coo.X + 2;
             HitBox.Y = (int)Coo.Y + 30;
             HpRectangle.Y = (int)Coo.Y + 5;
+        }
+
+        public override void AddHp(float value)
+        {
+            base.AddHp(value);
         }
 
         protected override void Move()

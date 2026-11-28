@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Threading.Tasks;
 using Cyvatar.src.Battle;
+using System.Diagnostics;
 
 namespace Cyvatar.src.GameScenes
 {
@@ -30,7 +31,7 @@ namespace Cyvatar.src.GameScenes
         {
             // This Delta Time value will be used by all entities that this GameScene manages
             dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            // Debug.WriteLine(dt);
+            Debug.WriteLine(dt);
 
             // When this happens, there should be a "Are you sure you want to try quitting the battle?"
             var keyboard = Keyboard.GetState();
@@ -40,7 +41,7 @@ namespace Cyvatar.src.GameScenes
                 return;
             }
 
-            Field.Update(dt, Controller.GetPressed());
+            Field.Update(Controller.GetPressed());
         }
 
         public override void Draw()

@@ -11,6 +11,8 @@ namespace Cyvatar.src.Battle.Warriors
 {
     public abstract class Warrior
     {
+        #region Properties
+
         /// <summary>
         /// Informs on which side of the field this warrior stands (Player or Enemy)
         /// </summary>
@@ -60,6 +62,8 @@ namespace Cyvatar.src.Battle.Warriors
         public Vector2 Coo;
         public Rectangle HitBox;
 
+        #endregion Properties
+
         protected Warrior(int x, int y, float hp, FieldSide side)
         {
             X = x;
@@ -73,6 +77,12 @@ namespace Cyvatar.src.Battle.Warriors
         /// It is automatically called every time the values of X or Y are changed;
         /// </summary>
         public abstract void UpdateAfterMovement();
+
+        /// <summary>
+        /// This is the method used whenever some Entity wants to make changes on the Hp properties of the Warrior.
+        /// </summary>
+        /// <param name="value"></param>
+        public abstract void AddHp(float value);
 
         public bool CollidesWith(Rectangle otherBounds)
         {

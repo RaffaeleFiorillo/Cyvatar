@@ -93,7 +93,7 @@ namespace Cyvatar.src.Battle.Warriors.Player
         /// </summary>
         public override void UpdateAfterMovement()
         {
-            Coo = new Vector2(X * 190, Y * -150 + 757);
+            Coo = new Vector2(20+X * 190, Y * -148 + 760);
 
             MovementCurrentCooldown = MovementTotalCooldown;
             AddEnergy(-MovementEnergyCost);
@@ -107,8 +107,7 @@ namespace Cyvatar.src.Battle.Warriors.Player
 
         #region Stats Alteration
         // These will be properly implemented in the class AttackPlayer so that it can directly affect the HUD
-
-        public abstract void AddHp(float value);
+        
         public abstract void AddEnergy(float value);
         public abstract void AddMana(float value);
 
@@ -331,7 +330,7 @@ namespace Cyvatar.src.Battle.Warriors.Player
         }
     }
 
-    public class ChargingAnimation: LoopAnimatioon
+    public class ChargingAnimation: LoopAnimation
     {
         public ChargingAnimation(Vector2 playerPosition) : base
         (
@@ -348,10 +347,10 @@ namespace Cyvatar.src.Battle.Warriors.Player
         /// <summary>
         /// Adjusts the position of the animation according to the position of the player.
         /// </summary>
-        /// <param name="playerPosition"></param>
-        public override void UpdateCoordinates(Vector2 playerPosition)
+        /// <param name="coo">Coordinates of the Player.</param>
+        public override void UpdateCoordinates(Vector2 coo)
         {
-            Coo = new Vector2(playerPosition.X - 205, playerPosition.Y - 195);
+            Coo = new Vector2(coo.X - 205, coo.Y - 195);
         }
 
         public void Update() { base.Update(GameScene.dt); }

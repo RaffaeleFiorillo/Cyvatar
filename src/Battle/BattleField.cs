@@ -30,8 +30,9 @@ namespace Cyvatar.src.Battle
         public static List<FieldCellEffect> FieldEffects = new List<FieldCellEffect>();
 
         // Assets
-        // Assets
         private Texture2D _background;
+        private Texture2D _gridImage;
+        private Vector2 _gridCoo = new Vector2(0, 430);
         private Texture2D _frontBase;
 
         #endregion Properties
@@ -69,6 +70,7 @@ namespace Cyvatar.src.Battle
         {
             // === Load images (runtime loading style) ===
             _background = GameSceneManager.LoadImage(Path.Combine("Battle", "Fields", "GrassField", "Field.png"));
+            _gridImage = GameSceneManager.LoadImage(Path.Combine("Battle", "Fields", "Grid.png"));
             _frontBase = GameSceneManager.LoadImage(Path.Combine("Battle", "Fields", "GrassField", "Base.png"));
 
             // Create player
@@ -80,6 +82,16 @@ namespace Cyvatar.src.Battle
             Enemies.Add(new SpearGoblin());
             Enemies.Add(new ArcherGoblin());
             Enemies.Add(new ArcherGoblin());
+            FieldEffects.Add(new LavaFloorEffect(0, 0));
+            FieldEffects.Add(new LavaFloorEffect(1, 1));
+            FieldEffects.Add(new LavaFloorEffect(2, 2));
+            FieldEffects.Add(new LavaFloorEffect(3, 3));
+            FieldEffects.Add(new LavaFloorEffect(4, 0));
+            FieldEffects.Add(new LavaFloorEffect(5, 1));
+            FieldEffects.Add(new LavaFloorEffect(6, 2));
+            FieldEffects.Add(new LavaFloorEffect(7, 3));
+            FieldEffects.Add(new LavaFloorEffect(8, 0));
+            FieldEffects.Add(new LavaFloorEffect(9, 1));
         }
 
         public static bool WarriorIsAllowedOnCell(Warrior warrior, int x, int y)
@@ -100,7 +112,22 @@ namespace Cyvatar.src.Battle
             Grid[x][y].warrior = warrior;  // Place warrior into new position
         }
 
-        public void Update(float dt, List<string> pressedButtons)
+        public static void RemoveWarriorFromCell(Warrior warrior)
+        {
+            Grid[warrior.X][warrior.Y].warrior = null; // Remove warrior from previous position
+        }
+
+        public static void PlaceEffectInCell(FieldCellEffect effect, int x, int y)
+        {
+            Grid[x][y].Effect = effect;
+        }
+
+        public static void RemoveEffectFromCell(FieldCellEffect effect)
+        {
+            Grid[effect.X][effect.Y].Effect = null;
+        }
+
+        public void Update(List<string> pressedButtons)
         {
             // Player actions
             _player.Act(pressedButtons);
@@ -139,6 +166,12 @@ namespace Cyvatar.src.Battle
                 }
             }
 
+            // Apply all Cell Effects
+            foreach (var cell in Grid.SelectMany(cl => cl).Where(c => c.warrior != null && c.Effect != null && c.Effect.State == CellEffectState.Active))
+            {
+                cell.Effect.ApplyEffect(cell.warrior);
+            }
+
             // Remove all "dead" damagers and Enemies
             Damagers = Damagers.Where(d => !d.ToBeDeleted).ToList();
             FieldEffects = FieldEffects.Where(e => !e.ToBeDeleted).ToList();
@@ -149,15 +182,18 @@ namespace Cyvatar.src.Battle
         {
             // Background
             GraphicManager.Screen.Draw(_background, Vector2.Zero, Color.White);
+            
+            foreach (var effect in FieldEffects) { effect.Draw(); }
+            GraphicManager.Screen.Draw(_gridImage, _gridCoo, Color.White);
 
             // Player
             _player.Draw();
 
             // Drawing the Enemies
-            for (int i = 0; i < Enemies.Count; i++) { Enemies[i].Draw(); }
+            foreach (var enemy in Enemies) { enemy.Draw(); }
 
             // Drawing the Damagers
-            for (int i = 0; i < Damagers.Count; i++) { Damagers[i].Draw(); }
+            foreach (var damager in Damagers) { damager.Draw(); }
 
             // Front Base
             GraphicManager.Screen.Draw(_frontBase, new Vector2(0, GameSceneManager.ScreenHeight - _frontBase.Height), Color.White);

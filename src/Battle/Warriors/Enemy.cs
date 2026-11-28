@@ -107,13 +107,9 @@ namespace Cyvatar.src.Battle.Warriors
             }
         }
 
-        public override void TakeDamageFrom(Damager damager)
+        public override void AddHp(float value)
         {
-            float damageTaken = damager.DealsContinuousDamage ? damager.Damage * GameScene.dt : damager.Damage;
-            if (HitValues.Count > 5) HitValues.RemoveAt(0);
-            HitValues.Add(new HitValue(damageTaken, CreateRandomHitValuePosition()));  // Display the damage taken on the screen
-            Hp -= damageTaken;
-
+            Hp += value;
             // Debug.WriteLine($"Hit! Remaining {Hp}");
 
             float hpPercentage = Hp / MaxHp;
@@ -130,6 +126,14 @@ namespace Cyvatar.src.Battle.Warriors
             HpRectangle.Width = (int)(hpPercentage * MaxHp);
         }
 
+        public override void TakeDamageFrom(Damager damager)
+        {
+            float damageTaken = damager.DealsContinuousDamage ? damager.Damage * GameScene.dt : damager.Damage;
+            if (HitValues.Count > 5) HitValues.RemoveAt(0);
+            HitValues.Add(new HitValue((int)damageTaken, CreateRandomHitValuePosition()));  // Display the damage taken on the screen
+            AddHp(-damageTaken);
+        }
+
         public override void Update()
         {
             base.Update();
@@ -140,6 +144,7 @@ namespace Cyvatar.src.Battle.Warriors
             {
                 case EnemyState.Dead:
                     DeathAnimation.Update(GameScene.dt);
+                    if (IsDead) BattleField.RemoveWarriorFromCell(this);
                     break;
 
                 case EnemyState.Attacking:
@@ -167,7 +172,7 @@ namespace Cyvatar.src.Battle.Warriors
             switch (State)
             {
                 case EnemyState.Dead:
-                    Debug.WriteLine("Is Dead");
+                    // Debug.WriteLine("Is Dead");
                     DeathAnimation.Draw();
                     break;
 

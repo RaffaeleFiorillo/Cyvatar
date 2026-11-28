@@ -60,11 +60,11 @@ namespace Cyvatar.src.Utils.Animations
         }
     }
 
-    public class LoopAnimatioon: Animation
+    public class LoopAnimation: Animation
     {
         private bool _firstLoop = true;
 
-        public LoopAnimatioon
+        public LoopAnimation
             (
                 string framesPath,
                 Vector2 initialPosition,

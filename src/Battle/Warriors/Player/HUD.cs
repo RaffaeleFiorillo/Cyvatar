@@ -56,6 +56,8 @@ namespace Cyvatar.src.Battle.Warriors.Player
 
         #endregion
 
+        private readonly Rectangle _auxBackgroundRect = new Rectangle(160, 10, HpBarMaxSize, 50);
+
 
         public HUD(AttackPlayer player)
         {
@@ -113,13 +115,14 @@ namespace Cyvatar.src.Battle.Warriors.Player
         public void Draw(SpriteBatch screen)
         {
             // Draw bars first (behind the HUD frame)
+            GraphicManager.DrawRectangle(_auxBackgroundRect, Color.Black);
             GraphicManager.DrawRectangle(_hpRect, _hpColor);
             GraphicManager.DrawRectangle(_energyRect, _energyColor);
 
             // Main HUD frame
             screen.Draw(_playerHudImage, _statsImageCoo, Color.White);
 
-            GraphicManager.DrawCenteredText(_player.Hp.ToString(), BattleScene.HpFont, HpTextRectanlge, Color.White);
+            GraphicManager.DrawCenteredText(((int)_player.Hp).ToString(), BattleScene.HpFont, HpTextRectanlge, Color.White);
             // GraphicManager.DrawRectangle(HpTextRectanlge, Color.Red);
 
             // Current attack mode icon
